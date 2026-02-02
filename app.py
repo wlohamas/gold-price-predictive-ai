@@ -65,10 +65,11 @@ def job():
             # Use the actual model predicted price for consistency
             next_pred = precision_data.get('predicted_price', current_price)
             
-            # Real-time label for the moving point (float epoch)
-            now_ts = bangkok_now.timestamp()
-            # Forecast label (next hour - top of hour)
-            forecast_ts = (bangkok_now + datetime.timedelta(hours=1)).replace(minute=0, second=0).timestamp()
+            # Real-time label for the moving point (True UTC Epoch)
+            now_ts = datetime.datetime.now(datetime.timezone.utc).timestamp()
+            # Forecast label (next hour - top of hour UTC)
+            forecast_dt = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
+            forecast_ts = forecast_dt.replace(minute=0, second=0, microsecond=0).timestamp()
 
             latest_data["chart"] = {
                 "labels": labels + [now_ts, forecast_ts],

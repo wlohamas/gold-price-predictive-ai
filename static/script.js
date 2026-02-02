@@ -234,12 +234,41 @@ function updateChart(data) {
         });
     }
 
-    if (!window.blinkInterval) {
-        window.blinkInterval = setInterval(() => {
+
+    // Smooth Pulse Animation (matching LIVE indicator)
+    if (!window.pulseInited) {
+        window.pulseInited = true;
+        const animate = () => {
             if (priceChart) {
+                const now = Date.now();
+                const t = (now % 1500) / 1500; // 1.5s period
+                const pulse = 0.5 + 0.5 * Math.cos(2 * Math.PI * t);
+
+                const cur_L = priceChart.data.labels.length;
+                if (cur_L >= 2) {
+                    const glowEffect = {
+                        radius: 5 + (8 * (1 - pulse)), // Size 5 to 13
+                        alpha: 0.3 + (0.7 * (1 - pulse)), // Opacity 0.3 to 1.0
+                        glow: 3 + (15 * (1 - pulse)) // Glow effect
+                    };
+
+                    // Dataset 0: Actual Price (second-to-last point)
+                    priceChart.data.datasets[0].pointRadius = (c) => (c.dataIndex === cur_L - 2) ? glowEffect.radius : 4;
+                    priceChart.data.datasets[0].pointBackgroundColor = (c) => (c.dataIndex === cur_L - 2) ? `rgba(255, 215, 0, ${glowEffect.alpha})` : '#FFD700';
+                    priceChart.data.datasets[0].pointBorderWidth = (c) => (c.dataIndex === cur_L - 2) ? glowEffect.glow : 2;
+                    priceChart.data.datasets[0].pointBorderColor = (c) => (c.dataIndex === cur_L - 2) ? `rgba(255, 215, 0, ${glowEffect.alpha * 0.4})` : 'rgba(255, 215, 0, 0.3)';
+
+                    // Dataset 1: AI Forecast (last point)
+                    priceChart.data.datasets[1].pointRadius = (c) => (c.dataIndex === cur_L - 1) ? glowEffect.radius : 3;
+                    priceChart.data.datasets[1].pointBackgroundColor = (c) => (c.dataIndex === cur_L - 1) ? `rgba(77, 255, 77, ${glowEffect.alpha})` : '#4dFF4d';
+                    priceChart.data.datasets[1].pointBorderWidth = (c) => (c.dataIndex === cur_L - 1) ? glowEffect.glow : 0;
+                    priceChart.data.datasets[1].pointBorderColor = (c) => (c.dataIndex === cur_L - 1) ? `rgba(77, 255, 77, ${glowEffect.alpha * 0.4})` : 'transparent';
+                }
                 priceChart.update('none');
             }
-        }, 500);
+            requestAnimationFrame(animate);
+        };
+        requestAnimationFrame(animate);
     }
 
     updateHistoryTable(fullLabels, fullActuals, fullPredictions);

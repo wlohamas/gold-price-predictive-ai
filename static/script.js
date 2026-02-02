@@ -207,7 +207,27 @@ function updateChart(data) {
                     y: {
                         beginAtZero: false,
                         grid: { color: 'rgba(255,255,255,0.05)' },
-                        ticks: { color: '#a1a1a1' }
+                        ticks: { color: '#a1a1a1' },
+                        min: function (context) {
+                            const chart = context.chart;
+                            const data = chart.data.datasets[0].data;
+                            if (data && data.length > 0) {
+                                const values = data.filter(v => v !== null && v !== undefined);
+                                const min = Math.min(...values);
+                                return min - (min * 0.02); // 2% padding below
+                            }
+                            return undefined;
+                        },
+                        max: function (context) {
+                            const chart = context.chart;
+                            const data = chart.data.datasets[0].data;
+                            if (data && data.length > 0) {
+                                const values = data.filter(v => v !== null && v !== undefined);
+                                const max = Math.max(...values);
+                                return max + (max * 0.02); // 2% padding above
+                            }
+                            return undefined;
+                        }
                     },
                     x: {
                         type: 'time',

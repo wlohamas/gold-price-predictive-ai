@@ -267,22 +267,22 @@ function updateChart(data) {
                 const cur_L = priceChart.data.labels.length;
                 if (cur_L >= 2) {
                     const glowEffect = {
-                        radius: 5 + (8 * (1 - pulse)), // Size 5 to 13
-                        alpha: 0.3 + (0.7 * (1 - pulse)), // Opacity 0.3 to 1.0
-                        glow: 3 + (15 * (1 - pulse)) // Glow effect
+                        radius: 3 + (2 * (1 - pulse)), // Size 3 to 5 (matching LIVE dot)
+                        alpha: 0.1 + (0.9 * (1 - pulse)), // Opacity 0.1 to 1.0
+                        glow: 1 + (4 * (1 - pulse)) // Glow effect 1 to 5
                     };
 
                     // Dataset 0: Actual Price (second-to-last point)
-                    priceChart.data.datasets[0].pointRadius = (c) => (c.dataIndex === cur_L - 2) ? glowEffect.radius : 4;
+                    priceChart.data.datasets[0].pointRadius = (c) => (c.dataIndex === cur_L - 2) ? glowEffect.radius : 3;
                     priceChart.data.datasets[0].pointBackgroundColor = (c) => (c.dataIndex === cur_L - 2) ? `rgba(255, 215, 0, ${glowEffect.alpha})` : '#FFD700';
-                    priceChart.data.datasets[0].pointBorderWidth = (c) => (c.dataIndex === cur_L - 2) ? glowEffect.glow : 2;
-                    priceChart.data.datasets[0].pointBorderColor = (c) => (c.dataIndex === cur_L - 2) ? `rgba(255, 215, 0, ${glowEffect.alpha * 0.4})` : 'rgba(255, 215, 0, 0.3)';
+                    priceChart.data.datasets[0].pointBorderWidth = (c) => (c.dataIndex === cur_L - 2) ? glowEffect.glow : 1;
+                    priceChart.data.datasets[0].pointBorderColor = (c) => (c.dataIndex === cur_L - 2) ? `rgba(255, 215, 0, ${glowEffect.alpha * 0.3})` : 'rgba(255, 215, 0, 0.2)';
 
                     // Dataset 1: AI Forecast (last point)
                     priceChart.data.datasets[1].pointRadius = (c) => (c.dataIndex === cur_L - 1) ? glowEffect.radius : 3;
                     priceChart.data.datasets[1].pointBackgroundColor = (c) => (c.dataIndex === cur_L - 1) ? `rgba(77, 255, 77, ${glowEffect.alpha})` : '#4dFF4d';
                     priceChart.data.datasets[1].pointBorderWidth = (c) => (c.dataIndex === cur_L - 1) ? glowEffect.glow : 0;
-                    priceChart.data.datasets[1].pointBorderColor = (c) => (c.dataIndex === cur_L - 1) ? `rgba(77, 255, 77, ${glowEffect.alpha * 0.4})` : 'transparent';
+                    priceChart.data.datasets[1].pointBorderColor = (c) => (c.dataIndex === cur_L - 1) ? `rgba(77, 255, 77, ${glowEffect.alpha * 0.3})` : 'transparent';
                 }
                 priceChart.update('none');
             }

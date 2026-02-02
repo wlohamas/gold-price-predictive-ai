@@ -134,16 +134,23 @@ function updateChart(data) {
     const fullPredictions = data.chart.prediction_point;
 
     // Slice for Chart display (6 hours history + 2 real-time/forecast points)
+    // Slice for Chart display (6 history + 1 now + 1 forecast = 8 points total)
     const L = data.chart.labels.length;
-    const chartSlice = L - 8; // 6 history + 1 now + 1 forecast = 8 points total
+    const chartSlice = L - 8;
     const labels = fullLabels.slice(chartSlice);
     const historyData = fullActuals.slice(chartSlice);
     const predictionData = fullPredictions.slice(chartSlice);
+
+    const allValues = [...historyData.filter(v => v !== null), ...predictionData.filter(v => v !== null)];
+    const yMin = Math.min(...allValues) * 0.998;
+    const yMax = Math.max(...allValues) * 1.002;
 
     if (priceChart) {
         priceChart.data.labels = labels;
         priceChart.data.datasets[0].data = historyData;
         priceChart.data.datasets[1].data = predictionData;
+        priceChart.options.scales.y.min = yMin;
+        priceChart.options.scales.y.max = yMax;
         priceChart.update();
     } else {
         priceChart = new Chart(ctx, {
@@ -158,15 +165,7 @@ function updateChart(data) {
                         backgroundColor: 'rgba(255, 215, 0, 0.1)',
                         borderWidth: 3,
                         pointBackgroundColor: '#fff',
-                        pointRadius: (context) => {
-                            const index = context.dataIndex;
-                            const count = context.chart.data.labels.length;
-                            // The real-time moving point is the second-to-last index (L-2)
-                            if (index === count - 2) {
-                                return (Math.floor(Date.now() / 500) % 2 === 0) ? 10 : 4;
-                            }
-                            return 4;
-                        },
+                        pointRadius: 3,
                         pointBorderWidth: 2,
                         tension: 0.3,
                         fill: true,
@@ -179,15 +178,7 @@ function updateChart(data) {
                         borderDash: [5, 5],
                         borderWidth: 2,
                         pointBackgroundColor: '#4dFF4d',
-                        pointRadius: (context) => {
-                            const index = context.dataIndex;
-                            const count = context.chart.data.labels.length;
-                            // The future forecast point is the last index (L-1)
-                            if (index === count - 1) {
-                                return (Math.floor(Date.now() / 500) % 2 === 0) ? 10 : 4;
-                            }
-                            return 3;
-                        },
+                        pointRadius: 3,
                         tension: 0.3,
                         fill: false,
                         spanGaps: true
@@ -203,31 +194,19 @@ function updateChart(data) {
                 plugins: {
                     legend: { labels: { color: '#a1a1a1' } }
                 },
+                layout: {
+                    padding: {
+                        top: 20,
+                        bottom: 20,
+                        left: 10,
+                        right: 25
+                    }
+                },
                 scales: {
                     y: {
                         beginAtZero: false,
                         grid: { color: 'rgba(255,255,255,0.05)' },
-                        ticks: { color: '#a1a1a1' },
-                        min: function (context) {
-                            const chart = context.chart;
-                            const data = chart.data.datasets[0].data;
-                            if (data && data.length > 0) {
-                                const values = data.filter(v => v !== null && v !== undefined);
-                                const min = Math.min(...values);
-                                return min - (min * 0.02); // 2% padding below
-                            }
-                            return undefined;
-                        },
-                        max: function (context) {
-                            const chart = context.chart;
-                            const data = chart.data.datasets[0].data;
-                            if (data && data.length > 0) {
-                                const values = data.filter(v => v !== null && v !== undefined);
-                                const max = Math.max(...values);
-                                return max + (max * 0.02); // 2% padding above
-                            }
-                            return undefined;
-                        }
+                        ticks: { color: '#a1a1a1' }
                     },
                     x: {
                         type: 'time',

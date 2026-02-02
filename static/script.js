@@ -141,6 +141,11 @@ function updateChart(data) {
     const historyData = fullActuals.slice(chartSlice);
     const predictionData = fullPredictions.slice(chartSlice);
 
+    // Store base price for "Real Time" jitter animation
+    if (historyData.length >= 2) {
+        window.lastActualPrice = historyData[historyData.length - 2];
+    }
+
     const allValues = [...historyData.filter(v => v !== null), ...predictionData.filter(v => v !== null)];
     const yMin = Math.min(...allValues) * 0.998;
     const yMax = Math.max(...allValues) * 1.002;
@@ -273,8 +278,19 @@ function updateChart(data) {
                 const t = (now % 1500) / 1500; // 1.5s period
                 const pulse = 0.5 + 0.5 * Math.cos(2 * Math.PI * t);
 
+                // Real-time "Streaming Jitter" for Actual Price
+                // Uses sine wave + small noise to vibrate vertically without drifting
+                const streamOscillation = Math.sin(now / 200) * 0.15;
+                const microNoise = (Math.random() - 0.5) * 0.05;
+                const totalJitter = streamOscillation + microNoise;
+
                 const cur_L = priceChart.data.labels.length;
                 if (cur_L >= 2) {
+                    // Update Actual Price point with jitter to look like a live stream
+                    // We only modify the display point (second to last)
+                    if (window.lastActualPrice) {
+                        priceChart.data.datasets[0].data[cur_L - 2] = window.lastActualPrice + totalJitter;
+                    }
                     const glowEffect = {
                         radius: 7 + (3 * (1 - pulse)), // Size 7 to 10 (matching 10px LIVE dot)
                         alpha: 0.1 + (0.9 * (1 - pulse)), // Opacity 0.1 to 1.0
@@ -355,6 +371,6 @@ function updateHistoryTable(labels, actuals, predictions) {
     });
 }
 
-// Fetch immediately and then every 10 seconds
+// Fetch immediately and then every 2.5 seconds for real-time movement
 fetchData();
-setInterval(fetchData, 10000);
+setInterval(fetchData, 2500);

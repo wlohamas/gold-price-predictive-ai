@@ -101,8 +101,8 @@ def run_schedule():
     """Runs the schedule loop."""
     # Run once on startup
     job()
-    # Update every 1 minute
-    schedule.every(1).minutes.do(job)
+    # Update every 10 seconds for real-time feel
+    schedule.every(10).seconds.do(job)
     while True:
         schedule.run_pending()
         time.sleep(1)

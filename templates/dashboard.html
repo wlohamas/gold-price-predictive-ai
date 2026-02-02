@@ -13,61 +13,89 @@
 
 <body>
 
-    <div class="container">
-        <header>
-            <div style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 0.5rem;">
-                <h1 style="margin: 0;">Gold Price Predictive AI</h1>
-                <div class="status-indicator">
-                    <div class="pulse-dot"></div>
-                    <span class="status-text">LIVE</span>
-                </div>
-            </div>
-            <p>AI/ML Predictive Analytic Demo by Wittawat</p>
-        </header>
-
-        <div class="card-grid">
-            <div class="card price-card">
-                <h2>Current Price (GC=F)</h2>
-                <div class="price" id="current-price">Loading...</div>
-                <div class="time">Last Updated: <span id="last-updated">--:--</span></div>
-            </div>
-
-            <div class="card prediction-card">
-                <h2>AI Forecast</h2>
-                <div class="price" id="prediction-price">Loading...</div>
-                <div class="trend" id="trend-indicator">Waiting for data...</div>
-            </div>
-
-            <div class="card confidence-card">
-                <h2>Confidence Level</h2>
-                <div class="price" id="confidence-score">--%</div>
-                <div class="reasoning" id="confidence-reasoning"
-                    style="font-size: 0.85rem; line-height: 1.4; color: #a1a1a1; margin-top: 10px;">
-                    วิเคราะห์ข้อมูลพื้นฐาน...
-                </div>
-            </div>
-
-            <div class="card accuracy-card">
-                <h2>Model Performance (12h)</h2>
-                <div class="price" id="accuracy-rate">Loading...</div>
+    <div class="container main-layout">
+        <div class="main-content">
+            <header>
                 <div
-                    style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; font-size: 0.85rem; color: #a1a1a1; display:flex; justify-content: space-between;">
-                    <span>RSI: <b id="rsi-val" style="color: #fff">--</b></span>
-                    <span>Sentiment: <b id="sentiment-val" style="color: #fff">--</b></span>
+                    style="display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 0.5rem;">
+                    <h1 style="margin: 0;">Gold Price Predictive AI</h1>
+                    <div class="status-indicator">
+                        <div class="pulse-dot"></div>
+                        <span class="status-text">LIVE</span>
+                    </div>
+                </div>
+                <p>AI/ML Predictive Analytic Demo by Wittawat</p>
+            </header>
+
+            <div class="card-grid">
+                <div class="card price-card">
+                    <h2>Current Price (GC=F)</h2>
+                    <div class="price" id="current-price">Loading...</div>
+                    <div class="time">Last Updated: <span id="last-updated">--:--</span></div>
+                </div>
+
+                <div class="card prediction-card">
+                    <h2>AI Forecast</h2>
+                    <div class="price" id="prediction-price">Loading...</div>
+                    <div class="trend" id="trend-indicator">Waiting for data...</div>
+                </div>
+
+                <div class="card confidence-card">
+                    <h2>Confidence Level</h2>
+                    <div class="price" id="confidence-score">--%</div>
+                    <div class="reasoning" id="confidence-reasoning"
+                        style="font-size: 0.85rem; line-height: 1.4; color: #a1a1a1; margin-top: 10px;">
+                        วิเคราะห์ข้อมูลพื้นฐาน...
+                    </div>
+                </div>
+
+                <div class="card accuracy-card">
+                    <h2>Model Performance (12h)</h2>
+                    <div class="price" id="accuracy-rate">Loading...</div>
+                    <div
+                        style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 10px; font-size: 0.85rem; color: #a1a1a1; display:flex; justify-content: space-between;">
+                        <span>RSI: <b id="rsi-val" style="color: #fff">--</b></span>
+                        <span>Sentiment: <b id="sentiment-val" style="color: #fff">--</b></span>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="card sentiment-card" style="margin-bottom: 1.5rem; text-align: left;">
-            <h2 style="margin-bottom: 1rem;">Market Sentiment Analysis</h2>
-            <div id="news-summary-list" style="display: grid; gap: 10px;">
-                <div style="color: #a1a1a1; font-style: italic;">กำลังรวบรวมข้อมูลข่าวสารล่าสุด...</div>
+            <div class="card sentiment-card" style="margin-bottom: 1.5rem; text-align: left;">
+                <h2 style="margin-bottom: 1rem;">Market Sentiment Analysis</h2>
+                <div id="news-summary-list" style="display: grid; gap: 10px;">
+                    <div style="color: #a1a1a1; font-style: italic;">กำลังรวบรวมข้อมูลข่าวสารล่าสุด...</div>
+                </div>
+            </div>
+
+            <div class="card chart-card">
+                <canvas id="priceChart"></canvas>
             </div>
         </div>
 
-        <div class="card chart-card">
-            <canvas id="priceChart"></canvas>
-        </div>
+        <aside class="sidebar">
+            <div class="card history-card">
+                <h2>6H Performance History</h2>
+                <div class="table-container">
+                    <table id="history-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Actual</th>
+                                <th>Predicted</th>
+                                <th>Accuracy</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-body">
+                            <tr>
+                                <td colspan="4" style="text-align:center; padding: 20px; color: var(--text-secondary);">
+                                    Waiting for historical data...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </aside>
     </div>
 
     <script src="/static/script.js"></script>

@@ -119,11 +119,6 @@ function updateChart(data) {
     // Expecting data.chart to have { labels, prices, prediction_point }
     if (!data.chart) return;
 
-    // We need to stitch the lines together visually
-    // The "prices" array has the history + current.
-    // The "prediction_point" array has nulls + prediction.
-    // To make them connect, the prediction dataset should start at the LAST point of "prices".
-
     const labels = data.chart.labels;
     const historyData = data.chart.prices;
     const predictionData = data.chart.prediction_point;
@@ -184,6 +179,44 @@ function updateChart(data) {
                 }
             }
         });
+    }
+    // Update history table
+    updateHistoryTable(labels, historyData, predictionData);
+}
+
+function updateHistoryTable(labels, actuals, predictions) {
+    const tableBody = document.getElementById('history-body');
+    if (!tableBody) return;
+
+    tableBody.innerHTML = '';
+
+    // We want the last 6 indices (history excluding the future point)
+    // The last element in labels is the future prediction.
+    const historyCount = labels.length - 1;
+    const startIndex = Math.max(0, historyCount - 6);
+
+    for (let i = historyCount - 1; i >= startIndex; i--) {
+        const time = labels[i];
+        const actual = actuals[i];
+        const predicted = predictions[i];
+
+        if (actual === null || predicted === null) continue;
+
+        const diff = Math.abs(actual - predicted);
+        const accuracy = Math.max(0, 100 - (diff / actual * 100));
+
+        let accClass = 'acc-mid';
+        if (accuracy > 99) accClass = 'acc-high';
+        else if (accuracy < 97) accClass = 'acc-low';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${time}</td>
+            <td style="font-weight: 600;">$${actual.toFixed(2)}</td>
+            <td style="color: var(--cyan);">$${predicted.toFixed(2)}</td>
+            <td class="${accClass}">${accuracy.toFixed(2)}%</td>
+        `;
+        tableBody.appendChild(row);
     }
 }
 

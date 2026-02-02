@@ -95,9 +95,7 @@ header p {
     border: 1px solid var(--card-border);
     border-radius: 20px;
     padding: 2rem;
-    box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        inset 0 1px 0 rgba(139, 92, 246, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(139, 92, 246, 0.1);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
@@ -118,10 +116,7 @@ header p {
 .card:hover {
     transform: translateY(-8px);
     border-color: var(--purple-primary);
-    box-shadow:
-        0 12px 48px rgba(139, 92, 246, 0.3),
-        0 0 0 1px rgba(139, 92, 246, 0.2),
-        inset 0 1px 0 rgba(139, 92, 246, 0.2);
+    box-shadow: 0 12px 48px rgba(139, 92, 246, 0.3), 0 0 0 1px rgba(139, 92, 246, 0.2), inset 0 1px 0 rgba(139, 92, 246, 0.2);
 }
 
 .card:hover::before {
@@ -202,7 +197,6 @@ h2 {
     backdrop-filter: blur(20px);
 }
 
-/* Trends */
 .trend-up {
     color: var(--success);
     text-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
@@ -217,7 +211,6 @@ h2 {
     color: var(--warning);
 }
 
-/* Live Status Indicator */
 .status-indicator {
     display: flex;
     align-items: center;
@@ -262,6 +255,17 @@ h2 {
     text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
 }
 
+@media (max-width: 1024px) {
+    .main-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100% !important;
+        min-width: unset;
+    }
+}
+
 @media (max-width: 768px) {
     .card-grid {
         grid-template-columns: 1fr;
@@ -274,4 +278,78 @@ h2 {
     .price {
         font-size: 2.2rem;
     }
+}
+
+/* Sidebar & History Table Style */
+.main-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    width: 98%;
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+.main-content {
+    flex: 3;
+    min-width: 0;
+}
+
+.sidebar {
+    flex: 1.2;
+    min-width: 380px;
+    position: sticky;
+    top: 20px;
+}
+
+.history-card {
+    padding: 1.5rem !important;
+}
+
+.table-container {
+    overflow-x: auto;
+    margin-top: 1rem;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.85rem;
+}
+
+th {
+    color: var(--text-secondary);
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--card-border);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 0.7rem;
+}
+
+td {
+    padding: 14px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+tr:hover td {
+    background: rgba(139, 92, 246, 0.1);
+}
+
+.acc-high {
+    color: var(--success);
+    font-weight: bold;
+}
+
+.acc-mid {
+    color: var(--warning);
+    font-weight: bold;
+}
+
+.acc-low {
+    color: var(--danger);
+    font-weight: bold;
 }

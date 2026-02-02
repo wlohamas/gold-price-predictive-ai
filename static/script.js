@@ -210,8 +210,17 @@ function updateChart(data) {
                             return value ? '$' + value.toFixed(1) : '';
                         },
                         display: function (context) {
-                            // Only show for non-null values
-                            return context.dataset.data[context.dataIndex] !== null;
+                            const index = context.dataIndex;
+                            const datasetIndex = context.datasetIndex;
+                            const count = context.chart.data.labels.length;
+
+                            // Show Actual Value only for the 'Current' point (second to last)
+                            if (datasetIndex === 0) return index === count - 2;
+
+                            // Show Prediction Value only for the 'Forecast' point (last)
+                            if (datasetIndex === 1) return index === count - 1;
+
+                            return false;
                         }
                     }
                 },

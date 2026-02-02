@@ -1,0 +1,10 @@
+yfinance
+pandas
+flask
+schedule
+python-dotenv
+scikit-learn
+numpy
+requests
+beautifulsoup4
+lxml

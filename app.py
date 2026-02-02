@@ -62,22 +62,20 @@ def job():
         # 2. Fetch history and backtest for chart
         try:
             labels, actuals, backtest_preds = agent.get_backtest_data(n_points=6)
-            
             # Use the actual model predicted price for consistency
             next_pred = precision_data.get('predicted_price', current_price)
             
-            # Standardize labels: replace the last label with exact current time
-            if labels:
-                labels[-1] = bangkok_now.strftime('%H:%M:%S')
-            
-            next_label = (bangkok_now + datetime.timedelta(hours=1)).strftime('%H:%M:%S')
+            # Real-time label for the moving point
+            now_label = bangkok_now.strftime('%H:%M:%S')
+            # Forecast label (next hour)
+            forecast_label = (bangkok_now + datetime.timedelta(hours=1)).replace(minute=0, second=0).strftime('%H:00:00')
 
             latest_data["chart"] = {
-                "labels": labels + [next_label],
-                "prices": actuals + [None], # History stops at current
-                "prediction_point": backtest_preds + [next_pred], # Backtest + Future
-                "high_threshold": [current_price * 1.03] * (len(labels) + 1),
-                "low_threshold": [current_price * 0.97] * (len(labels) + 1)
+                "labels": labels + [now_label, forecast_label],
+                "prices": actuals + [current_price, None], 
+                "prediction_point": backtest_preds + [current_price, next_pred], 
+                "high_threshold": [current_price * 1.03] * (len(labels) + 2),
+                "low_threshold": [current_price * 0.97] * (len(labels) + 2)
             }
         except Exception as e:
             print(f"Chart history error: {e}")

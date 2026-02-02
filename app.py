@@ -59,7 +59,7 @@ def job():
         latest_data["confidence"] = precision_data['confidence']
         latest_data["reasoning"] = precision_data['reasoning']
         latest_data["market_news"] = precision_data['market_news']
-        latest_data["last_updated"] = bangkok_now.strftime('%H:%M:%S (TH)')
+        latest_data["last_updated"] = bangkok_now.strftime('%H:%M:%S')
         
         # Sentiment summary for frontend if needed
         latest_data["sentiment"] = precision_data['sentiment']
@@ -73,7 +73,7 @@ def job():
             
             # Use the actual model predicted price for consistency
             next_pred = precision_data.get('predicted_price', current_price)
-            next_label = (bangkok_now + datetime.timedelta(hours=1)).strftime('%H:00')
+            next_label = (bangkok_now + datetime.timedelta(hours=1)).strftime('%H:%M:%S')
 
             latest_data["chart"] = {
                 "labels": labels + [next_label],

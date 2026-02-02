@@ -219,7 +219,7 @@ class GoldAgent:
                 
                 actuals.append(target_row['Close'])
                 predictions.append(pred)
-                labels.append(timestamp.strftime('%H:00'))
+                labels.append(timestamp.strftime('%H:%M:%S'))
                 
             return labels, actuals, predictions
         except Exception as e:

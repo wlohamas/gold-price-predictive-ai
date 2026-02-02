@@ -61,7 +61,7 @@ def job():
         
         # 2. Fetch history and backtest for chart
         try:
-            labels, actuals, backtest_preds = agent.get_backtest_data(n_points=6)
+            labels, actuals, backtest_preds = agent.get_backtest_data(n_points=12)
             # Use the actual model predicted price for consistency
             next_pred = precision_data.get('predicted_price', current_price)
             

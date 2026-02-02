@@ -206,6 +206,7 @@ function updateChart(data) {
                         type: 'time',
                         time: {
                             unit: 'hour',
+                            stepSize: 1,
                             displayFormats: {
                                 hour: 'HH:00:00'
                             },
@@ -215,8 +216,8 @@ function updateChart(data) {
                         ticks: {
                             color: '#a1a1a1',
                             maxRotation: 0,
-                            autoSkip: true,
-                            maxTicksLimit: 10
+                            autoSkip: false,
+                            maxTicksLimit: 12
                         }
                     }
                 }
@@ -246,10 +247,9 @@ function updateHistoryTable(labels, actuals, predictions) {
     const formatter = new Intl.DateTimeFormat('en-US', timeOptions);
 
     const L = labels.length;
-    // Indices 0 to L-3 are history (6 points)
-    // we want to show those 6 historical rows
+    // Indices 0 to L-3 are history (12 points now)
     const historyCount = L - 2;
-    const startIndex = Math.max(0, historyCount - 6);
+    const startIndex = Math.max(0, historyCount - 12);
 
     for (let i = historyCount - 1; i >= startIndex; i--) {
         const ts = labels[i];

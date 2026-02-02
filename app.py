@@ -73,7 +73,7 @@ def job():
             
             # Use the actual model predicted price for consistency
             next_pred = precision_data.get('predicted_price', current_price)
-            next_label = (datetime.datetime.now() + datetime.timedelta(hours=1)).strftime('%H:00')
+            next_label = (bangkok_now + datetime.timedelta(hours=1)).strftime('%H:00')
 
             latest_data["chart"] = {
                 "labels": labels + [next_label],

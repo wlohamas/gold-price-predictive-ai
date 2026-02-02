@@ -210,10 +210,16 @@ class GoldAgent:
                 model.fit(X_train, y_train)
                 
                 pred = model.predict([[len(train_data)]])[0]
+                import time as time_mod
+                timestamp = target_row.name
+                
+                # Check if we need to offset for Bangkok (UTC+7)
+                if time_mod.localtime().tm_gmtoff == 0:
+                    timestamp = timestamp + datetime.timedelta(hours=7)
                 
                 actuals.append(target_row['Close'])
                 predictions.append(pred)
-                labels.append(target_row.name.strftime('%H:00'))
+                labels.append(timestamp.strftime('%H:00'))
                 
             return labels, actuals, predictions
         except Exception as e:

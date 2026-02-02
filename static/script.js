@@ -150,8 +150,15 @@ function updateChart(data) {
                         borderColor: '#FFD700',
                         backgroundColor: 'rgba(255, 215, 0, 0.1)',
                         borderWidth: 3,
-                        pointBackgroundColor: labels.map((_, i) => i === labels.length - 2 ? '#fff' : '#fff'),
-                        pointRadius: labels.map((_, i) => i === labels.length - 2 ? 6 : 4),
+                        pointBackgroundColor: '#fff',
+                        pointRadius: (context) => {
+                            const index = context.dataIndex;
+                            const count = context.chart.data.labels.length;
+                            if (index === count - 2) {
+                                return (Math.floor(Date.now() / 500) % 2 === 0) ? 10 : 4;
+                            }
+                            return 4;
+                        },
                         pointBorderWidth: 2,
                         tension: 0.3,
                         fill: true,
@@ -164,7 +171,14 @@ function updateChart(data) {
                         borderDash: [5, 5],
                         borderWidth: 2,
                         pointBackgroundColor: '#4dFF4d',
-                        pointRadius: labels.map((_, i) => i === labels.length - 1 ? 6 : 3),
+                        pointRadius: (context) => {
+                            const index = context.dataIndex;
+                            const count = context.chart.data.labels.length;
+                            if (index === count - 1) {
+                                return (Math.floor(Date.now() / 500) % 2 === 0) ? 10 : 4;
+                            }
+                            return 3;
+                        },
                         tension: 0.3,
                         fill: false,
                         spanGaps: true
@@ -175,7 +189,7 @@ function updateChart(data) {
                 responsive: true,
                 maintainAspectRatio: false,
                 animation: {
-                    duration: 0 // Disable general animations for smoother manual blinking
+                    duration: 0
                 },
                 plugins: {
                     legend: { labels: { color: '#a1a1a1' } }
@@ -195,24 +209,11 @@ function updateChart(data) {
         });
     }
 
-    // Blinking effect loop
+    // Blinking effect loop: Just trigger a re-render without metadata update
     if (!window.blinkInterval) {
-        let isLarge = false;
         window.blinkInterval = setInterval(() => {
             if (priceChart) {
-                const L = priceChart.data.labels.length;
-                if (L > 2) {
-                    isLarge = !isLarge;
-                    // Current Actual (Index L-2)
-                    priceChart.data.datasets[0].pointRadius = priceChart.data.labels.map((_, i) =>
-                        i === L - 2 ? (isLarge ? 8 : 4) : 4
-                    );
-                    // Future Predicted (Index L-1)
-                    priceChart.data.datasets[1].pointRadius = priceChart.data.labels.map((_, i) =>
-                        i === L - 1 ? (isLarge ? 8 : 3) : 3
-                    );
-                    priceChart.update('none'); // Update without animation
-                }
+                priceChart.update('none'); // This calls the pointRadius functions
             }
         }, 500);
     }

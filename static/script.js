@@ -145,6 +145,10 @@ function updateChart(data) {
     const yMin = Math.min(...allValues) * 0.998;
     const yMax = Math.max(...allValues) * 1.002;
 
+    if (typeof ChartDataLabels !== 'undefined') {
+        Chart.register(ChartDataLabels);
+    }
+
     if (priceChart) {
         priceChart.data.labels = labels;
         priceChart.data.datasets[0].data = historyData;
@@ -192,7 +196,24 @@ function updateChart(data) {
                     duration: 0
                 },
                 plugins: {
-                    legend: { labels: { color: '#a1a1a1' } }
+                    legend: { labels: { color: '#a1a1a1' } },
+                    datalabels: {
+                        color: '#fff',
+                        align: 'top',
+                        offset: 4,
+                        font: {
+                            family: 'Outfit',
+                            size: 10,
+                            weight: '600'
+                        },
+                        formatter: function (value) {
+                            return value ? '$' + value.toFixed(1) : '';
+                        },
+                        display: function (context) {
+                            // Only show for non-null values
+                            return context.dataset.data[context.dataIndex] !== null;
+                        }
+                    }
                 },
                 layout: {
                     padding: {

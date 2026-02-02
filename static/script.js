@@ -224,7 +224,8 @@ function updateChart(data) {
                             color: '#a1a1a1',
                             maxRotation: 0,
                             autoSkip: false,
-                            maxTicksLimit: 8
+                            maxTicksLimit: 12,
+                            source: 'labels'
                         }
                     }
                 }
@@ -253,18 +254,29 @@ function updateHistoryTable(labels, actuals, predictions) {
     const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' };
     const formatter = new Intl.DateTimeFormat('en-US', timeOptions);
 
-    const L = labels.length;
-    // Indices 0 to L-3 are history (12 points now)
-    const historyCount = L - 2;
-    const startIndex = Math.max(0, historyCount - 12);
+    const nowMs = Date.now();
+    const historyEntries = [];
 
-    for (let i = historyCount - 1; i >= startIndex; i--) {
-        const ts = labels[i];
-        const timeStr = formatter.format(new Date(ts));
-        const actual = actuals[i];
-        const predicted = predictions[i];
+    for (let i = 0; i < labels.length; i++) {
+        // Only take points that are strictly in the historical group (before the real-time point)
+        if (labels[i] < nowMs - 120000) {
+            historyEntries.push({
+                ts: labels[i],
+                actual: actuals[i],
+                predicted: predictions[i]
+            });
+        }
+    }
 
-        if (actual === null || predicted === null) continue;
+    // Show 12 latest historical entries
+    const displayList = historyEntries.slice(-12).reverse();
+
+    displayList.forEach(entry => {
+        const timeStr = formatter.format(new Date(entry.ts));
+        const actual = entry.actual;
+        const predicted = entry.predicted;
+
+        if (actual === null || predicted === null) return;
 
         const diff = Math.abs(actual - predicted);
         const accuracy = Math.max(0, 100 - (diff / actual * 100));
@@ -281,7 +293,7 @@ function updateHistoryTable(labels, actuals, predictions) {
             <td class="${accClass}">${accuracy.toFixed(2)}%</td>
         `;
         tableBody.appendChild(row);
-    }
+    });
 }
 
 // Fetch immediately and then every 10 seconds

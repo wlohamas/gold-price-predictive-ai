@@ -65,18 +65,26 @@ def job():
             # Use the actual model predicted price for consistency
             next_pred = precision_data.get('predicted_price', current_price)
             
-            # Real-time label for the moving point (True UTC Epoch)
+            # Current UTC epoch
             now_ts = datetime.datetime.now(datetime.timezone.utc).timestamp()
-            # Forecast label (next hour - top of hour UTC)
+            
+            # Forecast UTC epoch (Next top of the hour)
             forecast_dt = datetime.datetime.now(datetime.timezone.utc) + datetime.timedelta(hours=1)
             forecast_ts = forecast_dt.replace(minute=0, second=0, microsecond=0).timestamp()
 
+            # Filter yf labels to only those strictly before 'now'
+            # (Sometimes yf returns the current hour candle, which we replace with 'now_ts')
+            valid_indices = [i for i, ts in enumerate(labels) if ts < now_ts - 120] # 2 min buffer
+            f_labels = [labels[i] for i in valid_indices]
+            f_actuals = [actuals[i] for i in valid_indices]
+            f_backtest_preds = [backtest_preds[i] for i in valid_indices]
+
             latest_data["chart"] = {
-                "labels": labels + [now_ts, forecast_ts],
-                "prices": actuals + [current_price, None], 
-                "prediction_point": backtest_preds + [current_price, next_pred], 
-                "high_threshold": [current_price * 1.03] * (len(labels) + 2),
-                "low_threshold": [current_price * 0.97] * (len(labels) + 2)
+                "labels": f_labels + [now_ts, forecast_ts],
+                "prices": f_actuals + [current_price, None], 
+                "prediction_point": f_backtest_preds + [current_price, next_pred], 
+                "high_threshold": [current_price * 1.03] * (len(f_labels) + 2),
+                "low_threshold": [current_price * 0.97] * (len(f_labels) + 2)
             }
         except Exception as e:
             print(f"Chart history error: {e}")

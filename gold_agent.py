@@ -191,18 +191,22 @@ class GoldAgent:
             if len(data) < n_points + 20: return [], []
             
             df = self.prepare_data(data)
-            
+            # Ensure yfinance data is localized correctly and converted to UTC
+            if df.index.tz is not None:
+                df.index = df.index.tz_convert('UTC')
+            else:
+                df.index = df.index.tz_localize('UTC')
+
             actuals = []
             predictions = []
             labels = []
             
             # We want to see the last n_points
             for i in range(n_points, 0, -1):
-                # Data up to the point of prediction
-                train_data = df.iloc[:-(i)]
                 target_row = df.iloc[-(i)]
                 
                 # Simple Linear Regression for backtest point
+                train_data = df.iloc[:-(i)]
                 X_train = np.arange(len(train_data)).reshape(-1, 1)
                 y_train = train_data['Close'].values
                 
@@ -210,9 +214,9 @@ class GoldAgent:
                 model.fit(X_train, y_train)
                 
                 pred = model.predict([[len(train_data)]])[0]
-                # yfinance timestamps are usually timezone-aware or UTC-based
-                timestamp = target_row.name
                 
+                # Get UTC timestamp
+                timestamp = target_row.name
                 actuals.append(target_row['Close'])
                 predictions.append(pred)
                 labels.append(timestamp.timestamp())

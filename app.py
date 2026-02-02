@@ -65,13 +65,13 @@ def job():
             # Use the actual model predicted price for consistency
             next_pred = precision_data.get('predicted_price', current_price)
             
-            # Real-time label for the moving point
-            now_label = bangkok_now.strftime('%H:%M:%S')
-            # Forecast label (next hour)
-            forecast_label = (bangkok_now + datetime.timedelta(hours=1)).replace(minute=0, second=0).strftime('%H:00:00')
+            # Real-time label for the moving point (float epoch)
+            now_ts = bangkok_now.timestamp()
+            # Forecast label (next hour - top of hour)
+            forecast_ts = (bangkok_now + datetime.timedelta(hours=1)).replace(minute=0, second=0).timestamp()
 
             latest_data["chart"] = {
-                "labels": labels + [now_label, forecast_label],
+                "labels": labels + [now_ts, forecast_ts],
                 "prices": actuals + [current_price, None], 
                 "prediction_point": backtest_preds + [current_price, next_pred], 
                 "high_threshold": [current_price * 1.03] * (len(labels) + 2),

@@ -126,10 +126,10 @@ async function fetchData() {
 }
 
 function updateChart(data) {
-    // Expecting data.chart to have { labels, prices, prediction_point }
     if (!data.chart) return;
 
-    const labels = data.chart.labels;
+    // Convert timestamps (seconds) from backend to milliseconds for JS Date
+    const labels = data.chart.labels.map(ts => ts * 1000);
     const historyData = data.chart.prices;
     const predictionData = data.chart.prediction_point;
 
@@ -154,6 +154,7 @@ function updateChart(data) {
                         pointRadius: (context) => {
                             const index = context.dataIndex;
                             const count = context.chart.data.labels.length;
+                            // The real-time moving point is the second-to-last index (L-2)
                             if (index === count - 2) {
                                 return (Math.floor(Date.now() / 500) % 2 === 0) ? 10 : 4;
                             }
@@ -174,6 +175,7 @@ function updateChart(data) {
                         pointRadius: (context) => {
                             const index = context.dataIndex;
                             const count = context.chart.data.labels.length;
+                            // The future forecast point is the last index (L-1)
                             if (index === count - 1) {
                                 return (Math.floor(Date.now() / 500) % 2 === 0) ? 10 : 4;
                             }
@@ -201,24 +203,35 @@ function updateChart(data) {
                         ticks: { color: '#a1a1a1' }
                     },
                     x: {
+                        type: 'time',
+                        time: {
+                            unit: 'hour',
+                            displayFormats: {
+                                hour: 'HH:00:00'
+                            },
+                            tooltipFormat: 'HH:mm:ss'
+                        },
                         grid: { display: false },
-                        ticks: { color: '#a1a1a1' }
+                        ticks: {
+                            color: '#a1a1a1',
+                            maxRotation: 0,
+                            autoSkip: true,
+                            maxTicksLimit: 10
+                        }
                     }
                 }
             }
         });
     }
 
-    // Blinking effect loop: Just trigger a re-render without metadata update
     if (!window.blinkInterval) {
         window.blinkInterval = setInterval(() => {
             if (priceChart) {
-                priceChart.update('none'); // This calls the pointRadius functions
+                priceChart.update('none');
             }
         }, 500);
     }
 
-    // Update history table
     updateHistoryTable(labels, historyData, predictionData);
 }
 
@@ -228,13 +241,19 @@ function updateHistoryTable(labels, actuals, predictions) {
 
     tableBody.innerHTML = '';
 
-    // We want the last 6 indices (history excluding the future point)
-    // The last element in labels is the future prediction.
-    const historyCount = labels.length - 1;
+    // Convert ms back to localized HH:mm:ss for table
+    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' };
+    const formatter = new Intl.DateTimeFormat('en-US', timeOptions);
+
+    const L = labels.length;
+    // Indices 0 to L-3 are history (6 points)
+    // we want to show those 6 historical rows
+    const historyCount = L - 2;
     const startIndex = Math.max(0, historyCount - 6);
 
     for (let i = historyCount - 1; i >= startIndex; i--) {
-        const time = labels[i];
+        const ts = labels[i];
+        const timeStr = formatter.format(new Date(ts));
         const actual = actuals[i];
         const predicted = predictions[i];
 
@@ -249,7 +268,7 @@ function updateHistoryTable(labels, actuals, predictions) {
 
         const row = document.createElement('tr');
         row.innerHTML = `
-            <td>${time}</td>
+            <td>${timeStr}</td>
             <td style="font-weight: 600;">$${actual.toFixed(2)}</td>
             <td style="color: var(--cyan);">$${predicted.toFixed(2)}</td>
             <td class="${accClass}">${accuracy.toFixed(2)}%</td>

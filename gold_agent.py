@@ -94,32 +94,43 @@ class GoldAgent:
             return []
 
     def analyze_market_sentiment_premium(self):
-        """Fetches news headlines and integrates Asian Market Logic."""
+        """Fetches news headlines from Investing.com and integrates Asian Market Logic."""
         try:
-            # 1. Standard Global News (Top 3)
-            url = "https://www.cnbc.com/id/15839069/device/rss/rss.html"
-            resp = requests.get(url, timeout=10)
-            soup = BeautifulSoup(resp.content, features="xml")
-            items = soup.find_all('item')[:3]
+            # 1. Scrape Investing.com Gold News (Top 3)
+            url = "https://www.investing.com/news/commodities/gold"
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+            }
+            resp = requests.get(url, headers=headers, timeout=10)
+            soup = BeautifulSoup(resp.content, "html.parser")
+            
+            # Find news items - Investing.com uses specific classes for headlines
+            news_items = soup.select('div.largeNewsItem, article.news-item, li.news-item')[:3]
             
             structured_news = []
-            pos_keywords = ['up', 'rise', 'cut', 'war', 'tension', 'higher', 'gain', 'safe-haven']
-            neg_keywords = ['fall', 'strong dollar', 'inflation', 'lower', 'negative', 'rate hike', 'hawk']
+            pos_keywords = ['up', 'rise', 'cut', 'war', 'tension', 'higher', 'gain', 'safe-haven', 'surge', 'bullish']
+            neg_keywords = ['fall', 'strong dollar', 'inflation', 'lower', 'negative', 'rate hike', 'hawk', 'drop', 'bearish']
             
-            for item in items:
-                title = item.title.text
+            for item in news_items:
+                title_tag = item.select_one('a.title, a[data-test="news-item-title"]')
+                if not title_tag: continue
+                
+                title = title_tag.get_text(strip=True)
                 h_low = title.lower()
                 impact = "Neutral"
                 if any(kw in h_low for kw in pos_keywords): impact = "Positive"
                 if any(kw in h_low for kw in neg_keywords): impact = "Negative"
                 
                 summary_th = title
+                # Simple keyword mapping for Thai summaries
                 if "Fed" in title or "Federal Reserve" in title:
-                    summary_th = "ความกังวลทิศทางดอกเบี้ยของ Fed ส่งผลต่อความผันผวน"
+                    summary_th = "ข่าวสารจาก Fed ส่งผลต่อความผันผวนของราคาทองคำ"
                 elif "Dollar" in title:
-                    summary_th = "ทิศทางค่าเงินดอลลาร์ที่แข็งค่ากดดันราคาสินทรัพย์ปลอดภัย"
+                    summary_th = "ดัชนีดอลลาร์สหรัฐ (DXY) เป็นปัจจัยสำคัญในการกำหนดทิศทางราคา"
                 elif "Gold" in title:
-                    summary_th = "ราคาทองคำเคลื่อนไหวในกรอบเพื่อรอความชัดเจนจากปัจจัยพื้นฐาน"
+                    summary_th = "นักลงทุนจับตาความเคลื่อนไหวของราคาทองคำจากปัจจัยมหภาค"
+                elif "Middle East" in title or "Israel" in title or "Iran" in title:
+                    summary_th = "สถานการณ์ความตึงเครียดทางภูมิรัฐศาสตร์หนุนแรงซื้อสินทรัพย์ปลอดภัย"
                 
                 structured_news.append({
                     "title": title,
@@ -127,10 +138,20 @@ class GoldAgent:
                     "summary_th": summary_th
                 })
             
+            # If scraping failed or empty, fallback to basic list
+            if not structured_news:
+                structured_news = [{
+                    "title": "Market awaiting fresh catalysts for Gold direction",
+                    "impact": "Neutral",
+                    "summary_th": "ตลาดกำลังรอปัจจัยใหม่เพื่อกำหนดทิศทางของราคาทองคำ"
+                }]
+
             # 2. Asian Market Specific Logic
             asian_news = self.analyze_asian_market_logic()
-            # Combine them: Asian insights first as they are 'Advanced'
             return asian_news + structured_news
+        except Exception as e:
+            print(f"Investing.com scraping error: {e}")
+            return self.analyze_asian_market_logic()
         except Exception as e:
             print(f"Premium news error: {e}")
             return []

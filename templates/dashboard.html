@@ -69,16 +69,18 @@
             <div class="card chart-card">
                 <canvas id="priceChart"></canvas>
             </div>
-        </div>
 
-        <aside class="sidebar">
-            <div class="card sentiment-card" style="margin-bottom: 20px; text-align: left;">
-                <h2 style="margin-bottom: 1rem;">Market Sentiment Analysis</h2>
-                <div id="news-summary-list" style="display: grid; gap: 10px;">
+            <div class="card sentiment-card" style="margin-top: 20px; text-align: left;">
+                <h2 style="margin-bottom: 1rem;">Market Sentiment Analysis (Investing.com)</h2>
+                <div id="news-summary-list"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px;">
                     <div style="color: #a1a1a1; font-style: italic; font-size: 0.85rem;">
                         กำลังรวบรวมข้อมูลข่าวสารล่าสุด...</div>
                 </div>
             </div>
+        </div>
+
+        <aside class="sidebar">
 
             <div class="card history-card" style="border: 1px solid var(--cyan);">
                 <h2>★★★ 6H PERFORMANCE HISTORY ★★★</h2>
@@ -105,8 +107,8 @@
         </aside>
     </div>
 
-    <script src="/static/script.js?v=2.4.0&t={{ range(999999999) | random }}"></script>
-    <script>console.log("Dashboard Version: 2.4.0 - Super Rock-Solid Chart Active");</script>
+    <script src="/static/script.js?v=2.5.0&t={{ range(999999999) | random }}"></script>
+    <script>console.log("Dashboard Version: 2.5.0 - New Bottom Layout & Investing.com News Active");</script>
 </body>
 
 </html>

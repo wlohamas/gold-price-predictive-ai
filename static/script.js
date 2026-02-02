@@ -212,10 +212,10 @@ function updateChart(data) {
                     x: {
                         type: 'time',
                         time: {
-                            unit: 'hour',
-                            stepSize: 1,
+                            unit: 'minute',
                             displayFormats: {
-                                hour: 'HH:00:00'
+                                minute: 'HH:mm',
+                                hour: 'HH:mm'
                             },
                             tooltipFormat: 'HH:mm:ss'
                         },
@@ -223,9 +223,8 @@ function updateChart(data) {
                         ticks: {
                             color: '#a1a1a1',
                             maxRotation: 0,
-                            autoSkip: false,
-                            maxTicksLimit: 12,
-                            source: 'labels'
+                            autoSkip: true,
+                            maxTicksLimit: 8
                         }
                     }
                 }

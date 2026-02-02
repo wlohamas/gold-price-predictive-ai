@@ -210,12 +210,10 @@ class GoldAgent:
                 model.fit(X_train, y_train)
                 
                 pred = model.predict([[len(train_data)]])[0]
-                import time as time_mod
-                timestamp = target_row.name
-                
-                # Check if we need to offset for Bangkok (UTC+7)
-                if time_mod.localtime().tm_gmtoff == 0:
-                    timestamp = timestamp + datetime.timedelta(hours=7)
+                # yfinance timestamps are usually UTC
+                timestamp = target_row.name.replace(tzinfo=None) # Ensure naive
+                # Always add 7 hours to align with Bangkok time
+                timestamp = timestamp + datetime.timedelta(hours=7)
                 
                 actuals.append(target_row['Close'])
                 predictions.append(pred)

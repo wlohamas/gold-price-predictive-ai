@@ -38,15 +38,7 @@ def job():
         current_price = precision_data['price']
         
         # Calculate Bangkok Time (UTC+7)
-        # Note: Render usually uses UTC. For demo simplicity, we offset by 7 hours if it's UTC
-        now = datetime.datetime.now()
-        # Check if we are in UTC (common on servers like Render)
-        import time as time_mod
-        is_utc = time_mod.localtime().tm_gmtoff == 0
-        if is_utc:
-            bangkok_now = now + datetime.timedelta(hours=7)
-        else:
-            bangkok_now = now
+        bangkok_now = datetime.datetime.utcnow() + datetime.timedelta(hours=7)
             
         # Update global state for API/Dashboard
         latest_data["price"] = current_price

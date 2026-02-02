@@ -190,8 +190,8 @@ h2 {
     padding: 1.5rem;
     background: var(--card-bg);
     backdrop-filter: blur(20px);
-    height: 500px;
-    /* Increased height for balance */
+    height: 350px;
+    /* Reduced by 30% for better compact balance */
     display: flex;
     flex-direction: column;
 }

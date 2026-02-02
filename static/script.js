@@ -1,6 +1,16 @@
-
 const ctx = document.getElementById('priceChart').getContext('2d');
 let priceChart;
+
+// Digital Clock Update
+setInterval(() => {
+    const now = new Date();
+    // Offset for Bangkok if local time isn't already UTC+7 (for display consistency)
+    // Actually simpler: just use a formatter for the UI clock
+    const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' };
+    const timeString = new Intl.DateTimeFormat('en-US', options).format(now);
+    const clockEl = document.getElementById('digital-clock');
+    if (clockEl) clockEl.innerText = timeString;
+}, 1000);
 
 async function fetchData() {
     try {

@@ -65,6 +65,11 @@ def job():
             
             # Use the actual model predicted price for consistency
             next_pred = precision_data.get('predicted_price', current_price)
+            
+            # Standardize labels: replace the last label with exact current time
+            if labels:
+                labels[-1] = bangkok_now.strftime('%H:%M:%S')
+            
             next_label = (bangkok_now + datetime.timedelta(hours=1)).strftime('%H:%M:%S')
 
             latest_data["chart"] = {

@@ -227,8 +227,8 @@ h2 {
     height: 10px;
     background: var(--success);
     border-radius: 50%;
-    animation: pulse-glow 2s ease-in-out infinite;
-    box-shadow: 0 0 10px var(--success);
+    animation: pulse-glow 1.5s ease-in-out infinite;
+    box-shadow: 0 0 12px var(--success);
 }
 
 @keyframes pulse-glow {
@@ -237,13 +237,13 @@ h2 {
     100% {
         opacity: 1;
         transform: scale(1);
-        box-shadow: 0 0 10px var(--success);
+        box-shadow: 0 0 15px var(--success);
     }
 
     50% {
-        opacity: 0.4;
-        transform: scale(0.8);
-        box-shadow: 0 0 20px var(--success);
+        opacity: 0.1;
+        transform: scale(0.7);
+        box-shadow: 0 0 5px var(--success);
     }
 }
 

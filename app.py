@@ -47,6 +47,17 @@ def job():
         latest_data["pct_change"] = ((latest_data["prediction"] - current_price) / current_price) * 100
         latest_data["accuracy"] = accuracy
         latest_data["last_correct"] = last_correct
+        
+        # Performance Reasoning Logic
+        if accuracy >= 90:
+            latest_data["accuracy_reason"] = "โมเดลจับทิศทางตลาดได้แม่นยำสูงในสภาวะแนวโน้มชัดเจน"
+        elif accuracy >= 70:
+            latest_data["accuracy_reason"] = "โมเดลทำงานได้ดีท่ามกลางความผันผวนปกติของตลาด"
+        elif accuracy >= 50:
+            latest_data["accuracy_reason"] = "ตลาดมีความผันผวนสูงกว่าปกติ กระทบต่อความแม่นยำรายชั่วโมง"
+        else:
+            latest_data["accuracy_reason"] = "ตลาดอยู่ในช่วงเปลี่ยนเทรดรวดเร็ว โมเดลอยู่ระหว่างการเรียนรู้รูปแบบใหม่"
+
         latest_data["trend"] = precision_data['prediction']
         latest_data["confidence"] = precision_data['confidence']
         latest_data["reasoning"] = precision_data['reasoning']

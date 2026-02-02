@@ -40,6 +40,9 @@ async function fetchData() {
 
             if (data.accuracy !== undefined) {
                 document.getElementById('accuracy-rate').innerText = `${data.accuracy.toFixed(1)}%`;
+                if (data.accuracy_reason) {
+                    document.getElementById('accuracy-reason').innerText = data.accuracy_reason;
+                }
 
                 const lastEl = document.getElementById('last-prediction-status');
                 if (lastEl) {

@@ -268,8 +268,8 @@ function updateHistoryTable(labels, actuals, predictions) {
         }
     }
 
-    // Show 12 latest historical entries
-    const displayList = historyEntries.slice(-12).reverse();
+    // Show 6 latest historical entries
+    const displayList = historyEntries.slice(-6).reverse();
 
     displayList.forEach(entry => {
         const timeStr = formatter.format(new Date(entry.ts));

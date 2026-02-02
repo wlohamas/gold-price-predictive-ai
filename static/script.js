@@ -34,6 +34,9 @@ async function fetchData() {
             }
 
             document.getElementById('last-updated').innerText = data.last_updated;
+            if (data.forecast_time) {
+                document.getElementById('forecast-time').innerText = data.forecast_time;
+            }
 
             if (data.accuracy !== undefined) {
                 document.getElementById('accuracy-rate').innerText = `${data.accuracy.toFixed(1)}%`;

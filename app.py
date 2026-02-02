@@ -53,6 +53,10 @@ def job():
         latest_data["market_news"] = precision_data['market_news']
         latest_data["last_updated"] = bangkok_now.strftime('%H:%M:%S')
         
+        # Calculate next hour for forecast display (Bangkok Time)
+        next_hour_dt = (bangkok_now + datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
+        latest_data["forecast_time"] = next_hour_dt.strftime('%-I %p') # e.g. "10 PM"
+        
         # Sentiment summary for frontend if needed
         latest_data["sentiment"] = precision_data['sentiment']
         latest_data["rsi"] = precision_data['rsi']

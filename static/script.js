@@ -214,10 +214,10 @@ function updateChart(data) {
                         time: {
                             unit: 'minute',
                             displayFormats: {
-                                minute: 'HH:mm',
-                                hour: 'HH:mm'
+                                minute: 'h:mm a',
+                                hour: 'h a'
                             },
-                            tooltipFormat: 'HH:mm:ss'
+                            tooltipFormat: 'h:mm:ss a'
                         },
                         grid: { display: false },
                         ticks: {
@@ -250,7 +250,7 @@ function updateHistoryTable(labels, actuals, predictions) {
     tableBody.innerHTML = '';
 
     // Convert ms back to localized HH:mm:ss for table
-    const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' };
+    const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Bangkok' };
     const formatter = new Intl.DateTimeFormat('en-US', timeOptions);
 
     const nowMs = Date.now();

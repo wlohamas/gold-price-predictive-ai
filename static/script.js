@@ -128,10 +128,17 @@ async function fetchData() {
 function updateChart(data) {
     if (!data.chart) return;
 
-    // Convert timestamps (seconds) from backend to milliseconds for JS Date
-    const labels = data.chart.labels.map(ts => ts * 1000);
-    const historyData = data.chart.prices;
-    const predictionData = data.chart.prediction_point;
+    // Full labels for history table (12 hours)
+    const fullLabels = data.chart.labels.map(ts => ts * 1000);
+    const fullActuals = data.chart.prices;
+    const fullPredictions = data.chart.prediction_point;
+
+    // Slice for Chart display (6 hours history + 2 real-time/forecast points)
+    const L = data.chart.labels.length;
+    const chartSlice = L - 8; // 6 history + 1 now + 1 forecast = 8 points total
+    const labels = fullLabels.slice(chartSlice);
+    const historyData = fullActuals.slice(chartSlice);
+    const predictionData = fullPredictions.slice(chartSlice);
 
     if (priceChart) {
         priceChart.data.labels = labels;
@@ -217,7 +224,7 @@ function updateChart(data) {
                             color: '#a1a1a1',
                             maxRotation: 0,
                             autoSkip: false,
-                            maxTicksLimit: 12
+                            maxTicksLimit: 8
                         }
                     }
                 }
@@ -233,7 +240,7 @@ function updateChart(data) {
         }, 500);
     }
 
-    updateHistoryTable(labels, historyData, predictionData);
+    updateHistoryTable(fullLabels, fullActuals, fullPredictions);
 }
 
 function updateHistoryTable(labels, actuals, predictions) {

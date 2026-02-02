@@ -6,6 +6,7 @@ async function fetchData() {
     try {
         const response = await fetch('/api/latest');
         const data = await response.json();
+        console.log("Data fetched:", data.last_updated);
 
         if (data.price) {
             document.getElementById('current-price').innerText = `$${data.price.toFixed(2)}`;

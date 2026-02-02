@@ -21,18 +21,33 @@ latest_data = {
 last_email_time = None
 
 def job():
-    """Background job for high-precision forecasting and briefing."""
     global last_email_time
-    print(f"Running high-precision job at {datetime.datetime.now()}")
+    print(f"[{datetime.datetime.now()}] Running high-precision job...")
     agent = GoldAgent()
     
     # 1. Institutional Grade Analysis
-    precision_data = agent.institutional_grade_analysis()
+    try:
+        precision_data = agent.institutional_grade_analysis()
+    except Exception as e:
+        print(f"Institutional analysis error in job: {e}")
+        return
+
     accuracy, last_correct = agent.get_model_accuracy()
     
     if precision_data:
         current_price = precision_data['price']
         
+        # Calculate Bangkok Time (UTC+7)
+        # Note: Render usually uses UTC. For demo simplicity, we offset by 7 hours if it's UTC
+        now = datetime.datetime.now()
+        # Check if we are in UTC (common on servers like Render)
+        import time as time_mod
+        is_utc = time_mod.localtime().tm_gmtoff == 0
+        if is_utc:
+            bangkok_now = now + datetime.timedelta(hours=7)
+        else:
+            bangkok_now = now
+            
         # Update global state for API/Dashboard
         latest_data["price"] = current_price
         latest_data["prediction_raw"] = precision_data['prediction'] 
@@ -44,13 +59,13 @@ def job():
         latest_data["confidence"] = precision_data['confidence']
         latest_data["reasoning"] = precision_data['reasoning']
         latest_data["market_news"] = precision_data['market_news']
-        latest_data["last_updated"] = datetime.datetime.now().strftime('%H:%M:%S')
+        latest_data["last_updated"] = bangkok_now.strftime('%H:%M:%S (TH)')
         
         # Sentiment summary for frontend if needed
         latest_data["sentiment"] = precision_data['sentiment']
         latest_data["rsi"] = precision_data['rsi']
 
-        print(f"Price: {current_price}, Prediction: {precision_data['prediction']}, RSI: {precision_data['rsi']:.1f}, Acc: {accuracy:.1f}%")
+        print(f"Updated at {latest_data['last_updated']}: Price={current_price}, Prediction={precision_data['prediction']}")
         
         # 2. Fetch history and backtest for chart
         try:

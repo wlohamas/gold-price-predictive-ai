@@ -150,10 +150,7 @@ class GoldAgent:
             asian_news = self.analyze_asian_market_logic()
             return asian_news + structured_news
         except Exception as e:
-            print(f"Investing.com scraping error: {e}")
-            return self.analyze_asian_market_logic()
-        except Exception as e:
-            print(f"Premium news error: {e}")
+            print(f"Market sentiment analysis error: {e}")
             return []
 
     def prepare_data(self, data):

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gold Price Agent</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/style.css?v={{ range(100000) | random }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/date-fns@3.3.1/cdn.min.js"></script>
     <script
@@ -80,8 +80,8 @@
                 </div>
             </div>
 
-            <div class="card history-card">
-                <h2>6H Performance History</h2>
+            <div class="card history-card" style="border: 1px solid var(--cyan);">
+                <h2>★★★ 6H PERFORMANCE HISTORY ★★★</h2>
                 <div class="table-container">
                     <table id="history-table">
                         <thead>
@@ -106,6 +106,7 @@
     </div>
 
     <script src="/static/script.js?t={{ range(10000000) | random }}"></script>
+    <script>console.log("Dashboard Version: 1.2.0 - 6H Layout Active");</script>
 </body>
 
 </html>

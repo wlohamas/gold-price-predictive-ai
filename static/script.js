@@ -251,8 +251,7 @@ function updateChart(data) {
                             displayFormats: {
                                 hour: 'h a'
                             },
-                            tooltipFormat: 'h:mm:ss a',
-                            round: 'hour'
+                            tooltipFormat: 'h:mm:ss a'
                         },
                         grid: { display: false },
                         ticks: {
@@ -286,10 +285,11 @@ function updateChart(data) {
 
                 const cur_L = priceChart.data.labels.length;
                 if (cur_L >= 2) {
-                    // Update Actual Price point with jitter to look like a live stream
-                    // We only modify the display point (second to last)
+                    // Update Actual Price point with jitter and REAL-TIME X-axis position
                     if (window.lastActualPrice) {
                         priceChart.data.datasets[0].data[cur_L - 2] = window.lastActualPrice + totalJitter;
+                        // Move horizontally to exact real-time position
+                        priceChart.data.labels[cur_L - 2] = now;
                     }
                     const glowEffect = {
                         radius: 7 + (3 * (1 - pulse)), // Size 7 to 10 (matching 10px LIVE dot)

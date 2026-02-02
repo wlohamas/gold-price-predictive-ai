@@ -135,8 +135,8 @@ function updateChart(data) {
 
     if (priceChart) {
         priceChart.data.labels = labels;
-        priceChart.data.datasets[0].data = historyData; // Actual
-        priceChart.data.datasets[1].data = predictionData; // Backtest + Prediction
+        priceChart.data.datasets[0].data = historyData;
+        priceChart.data.datasets[1].data = predictionData;
         priceChart.update();
     } else {
         priceChart = new Chart(ctx, {
@@ -147,11 +147,12 @@ function updateChart(data) {
                     {
                         label: 'Actual Price',
                         data: historyData,
-                        borderColor: '#FFD700', // Gold
+                        borderColor: '#FFD700',
                         backgroundColor: 'rgba(255, 215, 0, 0.1)',
                         borderWidth: 3,
-                        pointBackgroundColor: '#fff',
-                        pointRadius: 4,
+                        pointBackgroundColor: labels.map((_, i) => i === labels.length - 2 ? '#fff' : '#fff'),
+                        pointRadius: labels.map((_, i) => i === labels.length - 2 ? 6 : 4),
+                        pointBorderWidth: 2,
                         tension: 0.3,
                         fill: true,
                         spanGaps: true
@@ -159,11 +160,11 @@ function updateChart(data) {
                     {
                         label: 'AI Model (Backtest & Forecast)',
                         data: predictionData,
-                        borderColor: '#4dFF4d', // Green
+                        borderColor: '#4dFF4d',
                         borderDash: [5, 5],
                         borderWidth: 2,
                         pointBackgroundColor: '#4dFF4d',
-                        pointRadius: 3,
+                        pointRadius: labels.map((_, i) => i === labels.length - 1 ? 6 : 3),
                         tension: 0.3,
                         fill: false,
                         spanGaps: true
@@ -173,6 +174,9 @@ function updateChart(data) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: {
+                    duration: 0 // Disable general animations for smoother manual blinking
+                },
                 plugins: {
                     legend: { labels: { color: '#a1a1a1' } }
                 },
@@ -190,6 +194,29 @@ function updateChart(data) {
             }
         });
     }
+
+    // Blinking effect loop
+    if (!window.blinkInterval) {
+        let isLarge = false;
+        window.blinkInterval = setInterval(() => {
+            if (priceChart) {
+                const L = priceChart.data.labels.length;
+                if (L > 2) {
+                    isLarge = !isLarge;
+                    // Current Actual (Index L-2)
+                    priceChart.data.datasets[0].pointRadius = priceChart.data.labels.map((_, i) =>
+                        i === L - 2 ? (isLarge ? 8 : 4) : 4
+                    );
+                    // Future Predicted (Index L-1)
+                    priceChart.data.datasets[1].pointRadius = priceChart.data.labels.map((_, i) =>
+                        i === L - 1 ? (isLarge ? 8 : 3) : 3
+                    );
+                    priceChart.update('none'); // Update without animation
+                }
+            }
+        }, 500);
+    }
+
     // Update history table
     updateHistoryTable(labels, historyData, predictionData);
 }

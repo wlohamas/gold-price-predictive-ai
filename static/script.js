@@ -217,14 +217,16 @@ function updateChart(data) {
                             displayFormats: {
                                 hour: 'h a'
                             },
-                            tooltipFormat: 'h:mm:ss a'
+                            tooltipFormat: 'h:mm:ss a',
+                            round: 'hour'
                         },
                         grid: { display: false },
                         ticks: {
                             color: '#a1a1a1',
                             maxRotation: 0,
                             autoSkip: false,
-                            maxTicksLimit: 10
+                            maxTicksLimit: 10,
+                            source: 'auto'
                         }
                     }
                 }

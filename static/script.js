@@ -267,9 +267,9 @@ function updateChart(data) {
                 const cur_L = priceChart.data.labels.length;
                 if (cur_L >= 2) {
                     const glowEffect = {
-                        radius: 3 + (2 * (1 - pulse)), // Size 3 to 5 (matching LIVE dot)
+                        radius: 7 + (3 * (1 - pulse)), // Size 7 to 10 (matching 10px LIVE dot)
                         alpha: 0.1 + (0.9 * (1 - pulse)), // Opacity 0.1 to 1.0
-                        glow: 1 + (4 * (1 - pulse)) // Glow effect 1 to 5
+                        glow: 2 + (8 * (1 - pulse)) // Glow effect
                     };
 
                     // Dataset 0: Actual Price (second-to-last point)

@@ -284,8 +284,9 @@ function updateChart(data) {
                             const datasetIndex = context.datasetIndex;
                             const count = context.chart.data.labels.length;
 
-                            // Show Accuracy labels for all points on the trend line
-                            if (datasetIndex === 2) return context.dataset.data[index] !== null;
+                            // Show Accuracy label ONLY for the 'Best/Latest' point (second to last)
+                            // This keeps the chart clean, showing only the current performance.
+                            if (datasetIndex === 2) return index === count - 2 && context.dataset.data[index] !== null;
 
                             // Show Actual Value only for the 'Current' point (second to last)
                             if (datasetIndex === 0) return index === count - 2;
@@ -416,14 +417,14 @@ function updateHistoryTable(labels, actuals, predictions) {
     const nowMs = Date.now();
     const historyEntries = [];
 
-    // Take hourly points (allow 0-2 min past the hour for safety)
+    // Take hourly points (allow 0-5 min past the hour for safety)
     // and filter out future or extremely fresh points
     for (let i = 0; i < labels.length; i++) {
         const date = new Date(labels[i]);
-        // Relax check: 0, 1, or 2 minutes past the hour.
-        const isHourly = date.getMinutes() >= 0 && date.getMinutes() <= 2;
+        // Relax check: 0-5 minutes past the hour.
+        const isHourly = date.getMinutes() >= 0 && date.getMinutes() <= 5;
 
-        if (isHourly && labels[i] < nowMs - 10000) {
+        if (isHourly && labels[i] < nowMs - 5000) {
             historyEntries.push({
                 ts: labels[i],
                 actual: actuals[i],
@@ -433,13 +434,20 @@ function updateHistoryTable(labels, actuals, predictions) {
     }
 
     // Show 6 latest historical hourly entries (e.g., 2:00 PM, 1:00 PM...)
-    // Sorting to ensure correct sequence
-    const uniqueEntries = Array.from(new Set(historyEntries.map(e => e.ts)))
-        .map(ts => historyEntries.find(e => e.ts === ts))
+    // Deduplicate by Hour and Sort
+    const uniqueByHour = {};
+    historyEntries.forEach(e => {
+        const hourTs = new Date(e.ts).setMinutes(0, 0, 0);
+        if (!uniqueByHour[hourTs] || e.ts > uniqueByHour[hourTs].ts) {
+            uniqueByHour[hourTs] = e;
+        }
+    });
+
+    const displayList = Object.values(uniqueByHour)
         .sort((a, b) => b.ts - a.ts)
         .slice(0, 6);
 
-    uniqueEntries.forEach(entry => {
+    displayList.forEach(entry => {
         const timeStr = formatter.format(new Date(entry.ts));
         const actual = entry.actual;
         const predicted = entry.predicted;

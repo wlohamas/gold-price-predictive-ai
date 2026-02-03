@@ -163,6 +163,15 @@ function updateChart(data) {
         window.lastActualPrice = historyData[historyData.length - 2];
     }
 
+    // Calculate Accuracy Trend Data (%)
+    const accuracyTrendData = labels.map((_, i) => {
+        const actual = historyData[i];
+        const predicted = predictionData[i];
+        if (actual === null || predicted === null || actual === 0) return null;
+        const diff = Math.abs(actual - predicted);
+        return Math.max(0, 100 - (diff / actual * 100));
+    });
+
     const allValues = [...historyData.filter(v => v !== null && !isNaN(v)), ...predictionData.filter(v => v !== null && !isNaN(v))];
     const rawMin = Math.min(...allValues);
     const rawMax = Math.max(...allValues);
@@ -180,6 +189,7 @@ function updateChart(data) {
         priceChart.data.labels = labels;
         priceChart.data.datasets[0].data = historyData;
         priceChart.data.datasets[1].data = predictionData;
+        priceChart.data.datasets[2].data = accuracyTrendData;
         priceChart.options.scales.y.min = yMin;
         priceChart.options.scales.y.max = yMax;
         priceChart.update();
@@ -192,6 +202,7 @@ function updateChart(data) {
                     {
                         label: 'Actual Price',
                         data: historyData,
+                        yAxisID: 'y',
                         borderColor: '#FFD700',
                         backgroundColor: 'rgba(255, 215, 0, 0.1)',
                         borderWidth: 3,
@@ -203,8 +214,9 @@ function updateChart(data) {
                         spanGaps: true
                     },
                     {
-                        label: 'AI Model (Backtest & Forecast)',
+                        label: 'AI Model (Price)',
                         data: predictionData,
+                        yAxisID: 'y',
                         borderColor: '#4dFF4d',
                         borderDash: [5, 5],
                         borderWidth: 2,
@@ -212,6 +224,18 @@ function updateChart(data) {
                         pointRadius: 3,
                         tension: 0.3,
                         fill: false,
+                        spanGaps: true
+                    },
+                    {
+                        label: 'Accuracy Trend (%)',
+                        data: accuracyTrendData,
+                        yAxisID: 'y2',
+                        borderColor: 'rgba(77, 255, 77, 0.5)',
+                        backgroundColor: 'rgba(77, 255, 77, 0.05)',
+                        borderWidth: 1.5,
+                        pointRadius: 0,
+                        tension: 0.4,
+                        fill: true,
                         spanGaps: true
                     }
                 ]
@@ -233,7 +257,8 @@ function updateChart(data) {
                             size: 10,
                             weight: '600'
                         },
-                        formatter: function (value) {
+                        formatter: function (value, context) {
+                            if (context.datasetIndex === 2) return ''; // Hide labels for accuracy trend
                             return value ? '$' + value.toFixed(1) : '';
                         },
                         display: function (context) {
@@ -261,6 +286,7 @@ function updateChart(data) {
                 },
                 scales: {
                     y: {
+                        position: 'left',
                         beginAtZero: false,
                         grid: { color: 'rgba(255,255,255,0.05)' },
                         ticks: {
@@ -270,6 +296,18 @@ function updateChart(data) {
                         },
                         min: yMin,
                         max: yMax
+                    },
+                    y2: {
+                        position: 'right',
+                        beginAtZero: true,
+                        min: 0,
+                        max: 100,
+                        grid: { display: false },
+                        ticks: {
+                            color: 'rgba(77, 255, 77, 0.7)',
+                            stepSize: 20,
+                            callback: function (value) { return value + '%'; }
+                        }
                     },
                     x: {
                         type: 'time',

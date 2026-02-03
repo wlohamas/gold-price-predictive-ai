@@ -20,8 +20,15 @@ latest_data = {
 # Track last email time
 last_email_time = None
 
+# Add locked forecast storage (to fix prediction for the entire hour)
+locked_forecast = {
+    "price": None,
+    "target_hour": None,
+    "raw_trend": None
+}
+
 def job():
-    global last_email_time
+    global last_email_time, locked_forecast
     print(f"[{datetime.datetime.now()}] Running high-precision job...")
     agent = GoldAgent()
     
@@ -39,12 +46,25 @@ def job():
         
         # Calculate Bangkok Time (UTC+7)
         bangkok_now = datetime.datetime.utcnow() + datetime.timedelta(hours=7)
+        target_hour = (bangkok_now + datetime.timedelta(hours=1)).hour
+        
+        # HOURLY LOCK LOGIC: 
+        # Only update the 'predicted_price' and 'trend' once per hour
+        if locked_forecast["target_hour"] != target_hour or locked_forecast["price"] is None:
+            locked_forecast["price"] = precision_data.get('predicted_price', current_price)
+            locked_forecast["target_hour"] = target_hour
+            locked_forecast["raw_trend"] = precision_data['prediction']
+            print(f">>> [{bangkok_now}] New Hourly Forecast LOCKED: {target_hour}:00 Target = ${locked_forecast['price']:.2f}")
+
+        # Use the locked values for the dashboard
+        final_prediction_price = locked_forecast["price"]
+        final_trend = locked_forecast["raw_trend"]
             
         # Update global state for API/Dashboard
         latest_data["price"] = current_price
-        latest_data["prediction_raw"] = precision_data['prediction'] 
-        latest_data["prediction"] = precision_data.get('predicted_price', current_price)
-        latest_data["pct_change"] = ((latest_data["prediction"] - current_price) / current_price) * 100
+        latest_data["prediction_raw"] = final_trend 
+        latest_data["prediction"] = final_prediction_price
+        latest_data["pct_change"] = ((final_prediction_price - current_price) / current_price) * 100
         latest_data["accuracy"] = accuracy
         latest_data["last_correct"] = last_correct
         
@@ -77,8 +97,8 @@ def job():
         # 2. Fetch history and backtest for chart
         try:
             labels, actuals, backtest_preds = agent.get_backtest_data(n_points=12)
-            # Use the actual model predicted price for consistency
-            next_pred = precision_data.get('predicted_price', current_price)
+            # Use the LOCKED model predicted price for consistency
+            next_pred = locked_forecast["price"]
             
             # Current UTC epoch
             now_ts = datetime.datetime.now(datetime.timezone.utc).timestamp()

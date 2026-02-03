@@ -251,13 +251,21 @@ function updateChart(data) {
                 plugins: {
                     legend: { labels: { color: '#a1a1a1' } },
                     datalabels: {
-                        color: '#fff',
-                        align: 'top',
-                        offset: 4,
+                        color: function (context) {
+                            // Match label color to dataset color
+                            if (context.datasetIndex === 0) return '#FFD700'; // Actual Price
+                            if (context.datasetIndex === 1) return '#4dFF4d'; // AI Forecast
+                            return '#00d2ff'; // Accuracy Trend
+                        },
+                        align: function (context) {
+                            // Accuracy Trend labels below the point, Prices above
+                            return context.datasetIndex === 2 ? 'bottom' : 'top';
+                        },
+                        offset: 8,
                         font: {
                             family: 'Outfit',
                             size: 10,
-                            weight: '600'
+                            weight: '800'
                         },
                         formatter: function (value, context) {
                             if (context.datasetIndex === 2) return value ? value.toFixed(1) + '%' : '';

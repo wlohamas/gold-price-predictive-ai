@@ -36,16 +36,9 @@ def job():
     print(f"[{datetime.datetime.now()}] Running high-precision job...")
     agent = GoldAgent()
     
-    # Check if we need to refresh news (every 60 seconds)
-    now_ts = time.time()
+    # Force fresh news fetch every time to satisfy user request for frequent updates
     current_news = None
-    if now_ts - last_news_refresh < 60 and news_cache:
-        current_news = news_cache
-        print("Using cached news (refresh in progress...)")
-    else:
-        print("Refreshing NEWS from Investing.com...")
-        # news_cache will be updated inside institutional_grade_analysis if we don't pass current_news
-        pass
+    print("Refreshing NEWS from Data Source...")
 
     # 1. Institutional Grade Analysis
     try:

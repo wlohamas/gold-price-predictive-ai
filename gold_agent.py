@@ -154,8 +154,8 @@ class GoldAgent:
             # 2. Asian Market Specific Logic
             asian_news = self.analyze_asian_market_logic()
             
-            # Combine and strictly limit to 4 latest/relevant news items
-            combined_news = asian_news + structured_news
+            # Combine: Dynamic News first, then Asian insights, limited to 4 items
+            combined_news = structured_news + asian_news
             return combined_news[:4]
         except Exception as e:
             print(f"Market sentiment analysis error: {e}")

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gold AI Dashboard (DEMO) v1.5</title>
+    <title>Gold AI Dashboard (DEMO) v1.6</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css?v={{ range(100000) | random }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -102,7 +102,12 @@
             </div>
             <div class="card sentiment-card"
                 style="margin-top: 20px; text-align: left; border: 1px solid rgba(255,255,255,0.1);">
-                <h2 style="margin-bottom: 1rem; font-size: 1rem; color: var(--cyan);">Market Sentiment</h2>
+                <h2
+                    style="margin-bottom: 1rem; font-size: 1rem; color: var(--cyan); display: flex; justify-content: space-between; align-items: center;">
+                    <span>Market Sentiment</span>
+                    <span id="news-last-updated"
+                        style="font-size: 0.7rem; color: #a1a1a1; font-weight: normal;">Refreshed: --:--:--</span>
+                </h2>
                 <div id="news-summary-list" style="display: grid; gap: 12px;">
                     <div style="color: #a1a1a1; font-style: italic; font-size: 0.8rem;">
                         กำลังรวบรวมข้อมูลข่าวสารล่าสุด...</div>
@@ -111,8 +116,8 @@
         </aside>
     </div>
 
-    <script src="/static/script.js?v=1.5.0&t={{ range(1000000000) | random }}"></script>
-    <script>console.log("Dashboard Version: v1.5.0 - Clickable News Content Active");</script>
+    <script src="/static/script.js?v=1.6.0&t={{ range(1000000000) | random }}"></script>
+    <script>console.log("Dashboard Version: v1.6.0 - High-Freq News & Optimized Timeline Active");</script>
 </body>
 
 </html>

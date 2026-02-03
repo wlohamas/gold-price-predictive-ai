@@ -105,7 +105,7 @@ class GoldAgent:
             soup = BeautifulSoup(resp.content, "html.parser")
             
             # Find news items - Investing.com uses specific classes for headlines
-            news_items = soup.select('div.largeNewsItem, article.news-item, li.news-item')[:3]
+            news_items = soup.select('div.largeNewsItem, article.news-item, li.news-item')[:5]
             
             structured_news = []
             pos_keywords = ['up', 'rise', 'cut', 'war', 'tension', 'higher', 'gain', 'safe-haven', 'surge', 'bullish']

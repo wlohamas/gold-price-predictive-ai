@@ -96,6 +96,12 @@ async function fetchData() {
             // Update Market Sentiment List
             if (data.market_news) {
                 const newsList = document.getElementById('news-summary-list');
+                const lastUpdatedEl = document.getElementById('news-last-updated');
+
+                if (lastUpdatedEl && data.news_last_updated) {
+                    lastUpdatedEl.innerText = `Refreshed: ${data.news_last_updated}`;
+                }
+
                 if (newsList) {
                     newsList.innerHTML = '';
                     data.market_news.forEach(news => {
@@ -268,8 +274,8 @@ function updateChart(data) {
                         ticks: {
                             color: '#a1a1a1',
                             maxRotation: 0,
-                            autoSkip: false,
-                            maxTicksLimit: 10,
+                            autoSkip: true,
+                            maxTicksLimit: 5,
                             source: 'auto'
                         }
                     }

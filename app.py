@@ -53,6 +53,7 @@ def job():
         if current_news is None: # We fetched fresh news
             news_cache = precision_data['market_news']
             last_news_refresh = now_ts
+            latest_data["news_last_updated"] = datetime.datetime.fromtimestamp(now_ts).strftime('%H:%M:%S')
     except Exception as e:
         print(f"Institutional analysis error in job: {e}")
         return

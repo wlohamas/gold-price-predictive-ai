@@ -38,6 +38,7 @@ def job():
     
     # Force fresh news fetch every time to satisfy user request for frequent updates
     current_news = None
+    now_ts = time.time()
     print("Refreshing NEWS from Data Source...")
 
     # 1. Institutional Grade Analysis

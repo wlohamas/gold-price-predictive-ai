@@ -24,7 +24,8 @@ last_email_time = None
 locked_forecast = {
     "price": None,
     "target_hour": None,
-    "raw_trend": None
+    "raw_trend": None,
+    "confidence": None  # Add confidence locking
 }
 
 # Add news caching globals (1 minute refresh)
@@ -66,12 +67,13 @@ def job():
         target_hour = (bangkok_now + datetime.timedelta(hours=1)).hour
         
         # HOURLY LOCK LOGIC: 
-        # Only update the 'predicted_price' and 'trend' once per hour
+        # Only update the 'predicted_price', 'trend', and 'confidence' once per hour
         if locked_forecast["target_hour"] != target_hour or locked_forecast["price"] is None:
             locked_forecast["price"] = precision_data.get('predicted_price', current_price)
             locked_forecast["target_hour"] = target_hour
             locked_forecast["raw_trend"] = precision_data['prediction']
-            print(f">>> [{bangkok_now}] New Hourly Forecast LOCKED: {target_hour}:00 Target = ${locked_forecast['price']:.2f}")
+            locked_forecast["confidence"] = precision_data['confidence']  # Lock confidence score
+            print(f">>> [{bangkok_now}] New Hourly Forecast LOCKED: {target_hour}:00 Target = ${locked_forecast['price']:.2f}, Confidence = {locked_forecast['confidence']}%")
 
         # Use the locked values for the dashboard
         final_prediction_price = locked_forecast["price"]
@@ -96,7 +98,7 @@ def job():
             latest_data["accuracy_reason"] = "ตลาดอยู่ในช่วงเปลี่ยนเทรดรวดเร็ว โมเดลอยู่ระหว่างการเรียนรู้รูปแบบใหม่"
 
         latest_data["trend"] = precision_data['prediction']
-        latest_data["confidence"] = precision_data['confidence']
+        latest_data["confidence"] = locked_forecast.get("confidence", precision_data['confidence'])  # Use locked confidence
         latest_data["reasoning"] = precision_data['reasoning']
         latest_data["market_news"] = precision_data['market_news']
         latest_data["last_updated"] = bangkok_now.strftime('%H:%M:%S')

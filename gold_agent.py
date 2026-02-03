@@ -97,26 +97,23 @@ class GoldAgent:
         """Fetches news headlines from Investing.com and integrates Asian Market Logic."""
         try:
             # 1. Scrape Investing.com Gold News (Top 3)
-            url = "https://www.investing.com/news/commodities/gold"
+            url = "https://www.investing.com/commodities/gold-news"
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
             }
             resp = requests.get(url, headers=headers, timeout=10)
             soup = BeautifulSoup(resp.content, "html.parser")
             
-            # Find news items - Investing.com uses specific classes for headlines
-            news_items = soup.select('div.largeNewsItem, article.news-item, li.news-item')[:5]
+            # Find news items specific to the new Gold News page
+            news_items = soup.select('a[data-test="article-title-link"]')[:5]
             
             structured_news = []
             pos_keywords = ['up', 'rise', 'cut', 'war', 'tension', 'higher', 'gain', 'safe-haven', 'surge', 'bullish']
             neg_keywords = ['fall', 'strong dollar', 'inflation', 'lower', 'negative', 'rate hike', 'hawk', 'drop', 'bearish']
             
             for item in news_items:
-                title_tag = item.select_one('a.title, a[data-test="news-item-title"]')
-                if not title_tag: continue
-                
-                title = title_tag.get_text(strip=True)
-                link = title_tag.get('href', '#')
+                title = item.get_text(strip=True)
+                link = item.get('href', '#')
                 if link.startswith('/'):
                     link = "https://www.investing.com" + link
                 
@@ -149,7 +146,7 @@ class GoldAgent:
                     "title": "Market awaiting fresh catalysts for Gold direction",
                     "impact": "Neutral",
                     "summary_th": "ตลาดกำลังรอปัจจัยใหม่เพื่อกำหนดทิศทางของราคาทองคำ",
-                    "link": "https://www.investing.com/news/commodities/gold"
+                    "link": "https://www.investing.com/commodities/gold-news"
                 }]
 
             # 2. Asian Market Specific Logic

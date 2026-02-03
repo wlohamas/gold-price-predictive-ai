@@ -164,9 +164,12 @@ function updateChart(data) {
     }
 
     const allValues = [...historyData.filter(v => v !== null && !isNaN(v)), ...predictionData.filter(v => v !== null && !isNaN(v))];
-    // Dynamic Scale for Gold Price with slight padding
-    const yMin = Math.min(...allValues) * 0.995;
-    const yMax = Math.max(...allValues) * 1.005;
+    const rawMin = Math.min(...allValues);
+    const rawMax = Math.max(...allValues);
+
+    // Round down to nearest 50 for min, round up for max to ensure $50 intervals
+    const yMin = Math.floor((rawMin - 20) / 50) * 50;
+    const yMax = Math.ceil((rawMax + 20) / 50) * 50;
 
     if (typeof ChartDataLabels !== 'undefined') {
         Chart.register(ChartDataLabels);
@@ -261,8 +264,8 @@ function updateChart(data) {
                         grid: { color: 'rgba(255,255,255,0.05)' },
                         ticks: {
                             color: '#a1a1a1',
-                            maxTicksLimit: 6,
-                            callback: function (value) { return '$' + value.toFixed(0); }
+                            stepSize: 50,
+                            callback: function (value) { return '$' + value; }
                         },
                         min: yMin,
                         max: yMax

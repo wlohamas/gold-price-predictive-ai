@@ -150,7 +150,7 @@ async function fetchData() {
     }
 }
 
-function updateChart(data) {
+function updateChart(data, currentPrice, currentPrediction) {
     if (!data.chart) return;
 
     // Full labels for history table (12 hours)
@@ -471,10 +471,10 @@ function updateChart(data) {
         requestAnimationFrame(animate);
     }
 
-    updateHistoryTable(fullLabels, fullActuals, fullPredictions);
+    updateHistoryTable(fullLabels, fullActuals, fullPredictions, data.price, data.prediction);
 }
 
-function updateHistoryTable(labels, actuals, predictions) {
+function updateHistoryTable(labels, actuals, predictions, currentPrice, currentPrediction) {
     const tableBody = document.getElementById('history-body');
     if (!tableBody) return;
 
@@ -503,7 +503,6 @@ function updateHistoryTable(labels, actuals, predictions) {
         }
     }
 
-    // Show 6 latest historical hourly entries (e.g., 2:00 PM, 1:00 PM...)
     // Deduplicate by Hour and Sort
     const uniqueByHour = {};
     historyEntries.forEach(e => {
@@ -515,8 +514,33 @@ function updateHistoryTable(labels, actuals, predictions) {
 
     const displayList = Object.values(uniqueByHour)
         .sort((a, b) => b.ts - a.ts)
-        .slice(0, 6);
+        .slice(0, 5);  // Show 5 historical hours (current hour will be added separately)
 
+    // ADD CURRENT HOUR AT THE TOP (Real-time)
+    if (currentPrice && currentPrediction) {
+        const now = new Date();
+        const currentHourStr = formatter.format(now);
+        const diff = Math.abs(currentPrice - currentPrediction);
+        const accuracy = Math.max(0, 100 - (diff / currentPrice * 100));
+
+        let accClass = 'acc-mid';
+        if (accuracy > 99.5) accClass = 'acc-high';
+        else if (accuracy < 98) accClass = 'acc-low';
+
+        const currentRow = document.createElement('tr');
+        currentRow.style.borderLeft = '3px solid #00d2ff';
+        currentRow.style.background = 'rgba(0, 210, 255, 0.05)';
+        currentRow.innerHTML = `
+            <td style="font-weight: 700;">${currentHourStr} <span style="color: #00d2ff; font-size: 0.8em;">●</span></td>
+            <td style="font-weight: 700; color: #FFD700;">$${currentPrice.toFixed(2)}</td>
+            <td style="color: var(--cyan); font-weight: 600;">$${currentPrediction.toFixed(2)}</td>
+            <td class="${accClass}" style="font-weight: 700;">${accuracy.toFixed(2)}%</td>
+        `;
+        tableBody.appendChild(currentRow);
+        console.log(`History Table (CURRENT): ${currentHourStr} - Actual: $${currentPrice.toFixed(2)}, Predicted: $${currentPrediction.toFixed(2)}, Accuracy: ${accuracy.toFixed(2)}%`);
+    }
+
+    // ADD HISTORICAL HOURS (Locked values)
     displayList.forEach(entry => {
         const timeStr = formatter.format(new Date(entry.ts));
         const actual = entry.actual;

@@ -416,13 +416,14 @@ function updateHistoryTable(labels, actuals, predictions) {
     const nowMs = Date.now();
     const historyEntries = [];
 
-    // Strictly take only hourly points (timestamps ending in 00:00) 
+    // Take hourly points (allow 0-2 min past the hour for safety)
     // and filter out future or extremely fresh points
     for (let i = 0; i < labels.length; i++) {
         const date = new Date(labels[i]);
-        const isHourly = date.getMinutes() === 0;
+        // Relax check: 0, 1, or 2 minutes past the hour.
+        const isHourly = date.getMinutes() >= 0 && date.getMinutes() <= 2;
 
-        if (isHourly && labels[i] < nowMs - 60000) {
+        if (isHourly && labels[i] < nowMs - 10000) {
             historyEntries.push({
                 ts: labels[i],
                 actual: actuals[i],

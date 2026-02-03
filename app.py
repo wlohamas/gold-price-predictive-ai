@@ -121,8 +121,9 @@ def job():
             forecast_ts = forecast_dt.replace(minute=0, second=0, microsecond=0).timestamp()
 
             # Filter yf labels to only those strictly before 'now'
-            # (Sometimes yf returns the current hour candle, which we replace with 'now_ts')
-            valid_indices = [i for i, ts in enumerate(labels) if ts < now_ts - 120] # 2 min buffer
+            # Reducing buffer to 10s to ensure the current hour's 'Open' candle 
+            # (e.g., 15:00:00) is included even if it's just 15:00:15 now.
+            valid_indices = [i for i, ts in enumerate(labels) if ts < now_ts - 10] 
             f_labels = [labels[i] for i in valid_indices]
             f_actuals = [actuals[i] for i in valid_indices]
             f_backtest_preds = [backtest_preds[i] for i in valid_indices]

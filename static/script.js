@@ -150,10 +150,10 @@ function updateChart(data) {
     const fullActuals = data.chart.prices;
     const fullPredictions = data.chart.prediction_point;
 
-    // Slice for Chart display: Show only latest 5 points.
+    // Slice for Chart display: Show only latest 6 points (5 hours history + 1 forecast)
     // Safety check: ensure chartSlice is at least 0.
     const L = data.chart.labels.length;
-    const chartSlice = Math.max(0, L - 5);
+    const chartSlice = Math.max(0, L - 6);
     const labels = fullLabels.slice(chartSlice);
     const historyData = fullActuals.slice(chartSlice);
     const predictionData = fullPredictions.slice(chartSlice);
@@ -274,8 +274,8 @@ function updateChart(data) {
                         ticks: {
                             color: '#a1a1a1',
                             maxRotation: 0,
-                            autoSkip: true,
-                            maxTicksLimit: 5,
+                            autoSkip: false,
+                            maxTicksLimit: 6,
                             source: 'auto'
                         }
                     }

@@ -158,10 +158,19 @@ def job():
                     f_actuals[i] = hourly_snapshots[hour_ts]["actual"]
                     f_backtest_preds[i] = hourly_snapshots[hour_ts]["predicted"]
 
+
+            # Get the locked forecast for the CURRENT hour (not next hour)
+            current_hour_dt = bangkok_now.replace(minute=0, second=0, microsecond=0)
+            current_hour_utc = (current_hour_dt - datetime.timedelta(hours=7)).replace(tzinfo=datetime.timezone.utc)
+            current_hour_ts = current_hour_utc.timestamp()
+            
+            # Use locked forecast for current hour if available, otherwise use current price as fallback
+            current_hour_prediction = hourly_snapshots.get(current_hour_ts, {}).get("predicted", current_price)
+
             latest_data["chart"] = {
                 "labels": f_labels + [now_ts, forecast_ts],
                 "prices": f_actuals + [current_price, None], 
-                "prediction_point": f_backtest_preds + [current_price, next_pred], 
+                "prediction_point": f_backtest_preds + [current_hour_prediction, next_pred], 
                 "high_threshold": [current_price * 1.03] * (len(f_labels) + 2),
                 "low_threshold": [current_price * 0.97] * (len(f_labels) + 2)
             }

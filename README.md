@@ -1,8 +1,8 @@
 # 🏆 Gold Price Predictive AI
 
-> **Institutional-Grade AI/ML Predictive Analytics for Gold Market Analysis**
+> **ระบบวิเคราะห์และพยากรณ์ราคาทองคำด้วย AI/ML ระดับสถาบัน**
 
-A sophisticated real-time gold price prediction system powered by machine learning, technical analysis, and multi-factor sentiment analysis. Built with Python, Flask, and advanced financial modeling techniques.
+ระบบพยากรณ์ราคาทองคำแบบเรียลไทม์ที่ขับเคลื่อนด้วย Machine Learning, การวิเคราะห์ทางเทคนิค และการวิเคราะห์ความรู้สึกตลาดแบบหลายปัจจัย พัฒนาด้วย Python, Flask และเทคนิคการสร้างแบบจำลองทางการเงินขั้นสูง
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![Flask](https://img.shields.io/badge/Flask-3.0+-green.svg)
@@ -10,229 +10,255 @@ A sophisticated real-time gold price prediction system powered by machine learni
 
 ---
 
-## 🌟 Features
+## 🌟 ฟีเจอร์หลัก
 
-### 🎯 Institutional-Grade Scoring System
-- **EMA Crossover Detection** (9/21 periods) - 50 points
-- **RSI Alignment Analysis** (14 periods) - 20 points
-- **News Sentiment Integration** - 15 points
-- **DXY Correlation Tracking** - 15 points
-- **Confidence Threshold**: Alerts triggered at 75-80% confidence
+### 🎯 ระบบให้คะแนนระดับสถาบัน
+- **การตรวจจับ EMA Crossover** (9/21 periods) - 50 คะแนน
+- **การวิเคราะห์ RSI Alignment** (14 periods) - 20 คะแนน
+- **การรวมข้อมูล News Sentiment** - 15 คะแนน
+- **การติดตามความสัมพันธ์ DXY** - 15 คะแนน
+- **ระดับความเชื่อมั่น**: แจ้งเตือนเมื่อความเชื่อมั่น 75-80%
 
-### 📊 Advanced Technical Analysis
-- Weighted Linear Regression with recent data emphasis
-- Exponential Moving Averages (9 & 21 periods)
-- RSI divergence detection
-- Multi-timeframe backtesting (6-hour historical accuracy)
+### 📊 การวิเคราะห์ทางเทคนิคขั้นสูง
+- Weighted Linear Regression พร้อมเน้นน้ำหนักข้อมูลล่าสุด
+- Exponential Moving Averages (9 และ 21 periods)
+- การตรวจจับ RSI divergence
+- Backtesting แบบหลายกรอบเวลา (ความแม่นยำย้อนหลัง 6 ชั่วโมง)
 
-### 🌏 Asian Market Intelligence
-- PBOC (People's Bank of China) gold reserve monitoring
-- Lunar New Year demand cycle analysis
-- Real-time sentiment from Reuters, CNBC, Bloomberg
+### 🌏 ข้อมูลตลาดเอเชีย
+- ติดตามปริมาณทองคำสำรองของ PBOC (ธนาคารกลางจีน)
+- วิเคราะห์รอบความต้องการช่วงตรุษจีน
+- ข้อมูล Sentiment แบบเรียลไทม์จาก Reuters, CNBC, Bloomberg
 
-### 📈 Real-Time Dashboard
-- Modern dark blue/purple UI with glassmorphism
-- Live status indicator with pulsing animation
-- Interactive Chart.js visualizations
-- Confidence score breakdown
-- Thai language executive insights
+### 📈 Dashboard แบบเรียลไทม์
+- UI สีน้ำเงิน/ม่วงเข้มสมัยใหม่พร้อม Glassmorphism
+- ตัวบอกสถานะแบบเรียลไทม์พร้อมแอนิเมชั่น Pulse
+- การแสดงผลด้วย Chart.js แบบ Interactive
+- รายละเอียดคะแนนความเชื่อมั่น
+- ข้อมูลเชิงลึกสำหรับผู้บริหารเป็นภาษาไทย
 
-### 📧 Automated Reporting
-- Hourly executive briefings (Thai language)
-- Email notifications for high-confidence signals
-- Detailed market sentiment summaries
+### 📧 รายงานอัตโนมัติ
+- รายงานสรุปสำหรับผู้บริหารทุกชั่วโมง (ภาษาไทย)
+- การแจ้งเตือนทางอีเมลสำหรับสัญญาณความเชื่อมั่นสูง
+- สรุปความรู้สึกตลาดอย่างละเอียด
 
 ---
 
-## � Quick Start
+## 🚀 เริ่มต้นใช้งานอย่างรวดเร็ว
 
-### Prerequisites
-- Python 3.9 or higher
+### ข้อกำหนดเบื้องต้น
+- Python 3.9 หรือสูงกว่า
 - pip package manager
-- (Optional) Email account for notifications
+- (ตัวเลือก) บัญชีอีเมลสำหรับการแจ้งเตือน
 
-### Installation
+### การติดตั้ง
 
-1. **Clone the repository**
+1. **Clone repository**
 ```bash
-git clone https://github.com/yourusername/gold-price-predictive-ai.git
+git clone https://github.com/wlohamas/gold-price-predictive-ai.git
 cd gold-price-predictive-ai
 ```
 
-2. **Create virtual environment**
+2. **สร้าง virtual environment**
 ```bash
 python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # บน Windows: venv\\Scripts\\activate
 ```
 
-3. **Install dependencies**
+3. **ติดตั้ง dependencies**
 ```bash
 pip install -r requirements.txt
 ```
 
-4. **Configure environment (Optional)**
+4. **ตั้งค่า environment (ตัวเลือก)**
 ```bash
 cp .env.example .env
-# Edit .env with your email credentials for notifications
+# แก้ไข .env ด้วยข้อมูลอีเมลของคุณสำหรับการแจ้งเตือน
 ```
 
-5. **Run the application**
+5. **รันแอปพลิเคชัน**
 ```bash
 python app.py
 ```
 
-6. **Access the dashboard**
-Open your browser to: `http://localhost:5001`
+6. **เข้าถึง Dashboard**
+เปิดเบราว์เซอร์ไปที่: `http://localhost:5001`
 
 ---
 
-## 📖 How It Works
+## 📖 วิธีการทำงาน
 
-### Confidence Scoring Algorithm
+### อัลกอริทึมการให้คะแนนความเชื่อมั่น
 
-The system uses a **100-point weighted scoring system**:
+ระบบใช้ **ระบบให้คะแนนแบบถ่วงน้ำหนัก 100 คะแนน**:
 
 ```
-Total Score = Trend (50) + RSI (20) + Sentiment (15) + DXY (15)
+คะแนนรวม = Trend (50) + RSI (20) + Sentiment (15) + DXY (15)
 ```
 
-#### 1. Trend Analysis (50 points)
-- Detects 9 EMA crossing 21 EMA within last 3 bars
-- Awards full points only on fresh crossovers
-- Identifies BULLISH or BEARISH market structure
+#### 1. การวิเคราะห์เทรนด์ (50 คะแนน)
+- ตรวจจับ 9 EMA ตัดผ่าน 21 EMA ภายใน 3 แท่งล่าสุด
+- ให้คะแนนเต็มเฉพาะเมื่อเกิด Crossover ใหม่
+- ระบุโครงสร้างตลาดแบบ BULLISH หรือ BEARISH
 
-#### 2. RSI Alignment (20 points)
-- Checks for price/RSI divergence
-- Confirms momentum alignment with trend
-- Validates strength of directional move
+#### 2. RSI Alignment (20 คะแนน)
+- ตรวจสอบความแตกต่างระหว่างราคา/RSI
+- ยืนยันโมเมนตัมสอดคล้องกับเทรนด์
+- ตรวจสอบความแข็งแกร่งของการเคลื่อนไหวทิศทาง
 
-#### 3. News Sentiment (15 points)
-- Analyzes top financial news headlines
-- Categorizes as Supportive/Neutral/Opposite
-- **HARD STOP**: Score = 0 if sentiment contradicts trend
+#### 3. News Sentiment (15 คะแนน)
+- วิเคราะห์หัวข้อข่าวการเงินชั้นนำ
+- จัดประเภทเป็น Supportive/Neutral/Opposite
+- **HARD STOP**: คะแนน = 0 หาก Sentiment ขัดแย้งกับเทรนด์
 
-#### 4. DXY Correlation (15 points)
-- Monitors US Dollar Index inverse relationship
-- Gold typically rises when DXY falls
-- Confirms macro environment alignment
+#### 4. DXY Correlation (15 คะแนน)
+- ติดตามความสัมพันธ์แบบผกผันกับ US Dollar Index
+- ทองคำมักจะขึ้นเมื่อ DXY ลง
+- ยืนยันความสอดคล้องของสภาพแวดล้อมมหภาค
 
-### Alert Thresholds
+### ระดับการแจ้งเตือน
 
-| Score Range | Action | Description |
-|------------|--------|-------------|
-| 75-80% | 🔔 **TRADE SIGNAL** | Optimal risk/reward setup |
-| 81-100% | ⚠️ High Confidence | Strong alignment, monitor |
-| 60-74% | 📊 Medium | Watch for development |
-| 0-59% | ⏸️ Low | Wait for clarity |
-
----
-
-## 🎨 Dashboard Preview
-
-The dashboard features a modern, executive-grade interface with:
-- **Live Status Indicator**: Pulsing green dot shows system is active
-- **Confidence Gauge**: Real-time score with color-coded alerts
-- **Market Sentiment**: Latest news with impact analysis
-- **Price Chart**: 6-hour historical + 1-hour forecast
-- **Asian Market Insights**: PBOC and seasonal demand tracking
+| ช่วงคะแนน | การดำเนินการ | คำอธิบาย |
+|------------|--------|----------------|
+| 75-80% | 🔔 **สัญญาณเทรด** | ความเสี่ยง/ผลตอบแทนที่เหมาะสม |
+| 81-100% | ⚠️ ความเชื่อมั่นสูง | ความสอดคล้องแข็งแกร่ง ควรติดตาม |
+| 60-74% | 📊 ปานกลาง | ติดตามการพัฒนา |
+| 0-59% | ⏸️ ต่ำ | รอความชัดเจน |
 
 ---
 
-## � Project Structure
+## 🎨 ตัวอย่าง Dashboard
+
+Dashboard มีอินเทอร์เฟซระดับผู้บริหารที่ทันสมัยพร้อม:
+- **ตัวบอกสถานะแบบเรียลไทม์**: จุดสีเขียวกระพริบแสดงว่าระบบทำงานอยู่
+- **เกจความเชื่อมั่น**: คะแนนแบบเรียลไทม์พร้อมการแจ้งเตือนแบบแยกสี
+- **ความรู้สึกตลาด**: ข่าวล่าสุดพร้อมการวิเคราะห์ผลกระทบ
+- **กราฟราคา**: ประวัติ 6 ชั่วโมง + พยากรณ์ 1 ชั่วโมง
+- **ข้อมูลตลาดเอเชีย**: การติดตาม PBOC และความต้องการตามฤดูกาล
+- **Dual Y-Axis Chart**: แสดงราคาและ Accuracy Trend พร้อมกัน
+- **6H Performance History**: ตารางแสดงประสิทธิภาพย้อนหลัง 6 ชั่วโมง
+
+---
+
+## 📁 โครงสร้างโปรเจค
 
 ```
 gold-price-predictive-ai/
-├── app.py                  # Flask application & scheduler
-├── gold_agent.py          # Core ML/AI logic
+├── app.py                  # แอปพลิเคชัน Flask และ Scheduler
+├── gold_agent.py          # ตรรกะ ML/AI หลัก
 ├── requirements.txt       # Python dependencies
-├── .env.example          # Environment template
+├── .env.example          # เทมเพลต Environment
 ├── templates/
-│   └── dashboard.html    # Frontend UI
+│   └── dashboard.html    # UI ส่วนหน้า
 ├── static/
-│   ├── style.css        # Modern dark blue/purple theme
-│   └── script.js        # Real-time data updates
-└── README.md            # This file
+│   ├── style.css        # ธีมสีน้ำเงิน/ม่วงเข้มสมัยใหม่
+│   └── script.js        # อัปเดตข้อมูลแบบเรียลไทม์
+└── README.md            # ไฟล์นี้
 ```
 
 ---
 
-## 🔧 Configuration
+## 🔧 การตั้งค่า
 
-### Email Notifications (Optional)
+### การแจ้งเตือนทางอีเมล (ตัวเลือก)
 
-To enable hourly executive briefings:
+เพื่อเปิดใช้งานรายงานสำหรับผู้บริหารทุกชั่วโมง:
 
-1. Create a `.env` file from the template
-2. Add your email credentials:
+1. สร้างไฟล์ `.env` จากเทมเพลต
+2. เพิ่มข้อมูลอีเมลของคุณ:
 ```env
 EMAIL_ADDRESS=your_email@gmail.com
 EMAIL_PASSWORD=your_app_password
 RECIPIENT_EMAIL=recipient@example.com
 ```
 
-**Note**: For Gmail, use an [App Password](https://support.google.com/accounts/answer/185833)
+**หมายเหตุ**: สำหรับ Gmail ใช้ [App Password](https://support.google.com/accounts/answer/185833)
 
 ---
 
-## 🧪 Technical Stack
+## 🧪 เทคโนโลยีที่ใช้
 
 - **Backend**: Python 3.9+, Flask
 - **ML/Data**: scikit-learn, pandas, yfinance
 - **Scraping**: BeautifulSoup4, requests
 - **Frontend**: HTML5, CSS3, JavaScript (Vanilla)
-- **Visualization**: Chart.js
+- **Visualization**: Chart.js (พร้อม chartjs-plugin-datalabels)
 - **Scheduling**: APScheduler
 
 ---
 
-## 📊 Data Sources
+## 📊 แหล่งข้อมูล
 
-- **Price Data**: Yahoo Finance (GC=F - Gold Futures)
+- **ข้อมูลราคา**: Yahoo Finance (GC=F - Gold Futures)
 - **Dollar Index**: DXY (US Dollar Index)
-- **News**: CNBC Markets RSS Feed
-- **Asian Markets**: World Gold Council, PBOC reports
+- **ข่าว**: CNBC Markets RSS Feed
+- **ตลาดเอเชีย**: World Gold Council, รายงาน PBOC
 
 ---
 
 ## 🌐 API Endpoints
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/` | GET | Main dashboard |
-| `/api/latest` | GET | Latest prediction data (JSON) |
+| Endpoint | Method | คำอธิบาย |
+|----------|--------|----------|
+| `/` | GET | Dashboard หลัก |
+| `/api/latest` | GET | ข้อมูลการพยากรณ์ล่าสุด (JSON) |
 
 ---
 
-## 🤝 Contributing
+## 🎯 ฟีเจอร์เด่นของ Dashboard v2.19.0
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### 📈 Dual Y-Axis Chart
+- **แกนซ้าย (Y)**: แสดงราคาทองคำ ($) พร้อม scale ทีละ $50
+- **แกนขวา (Y2)**: แสดง Accuracy Trend (%) แบบ 0-100% fixed scale
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+### 🔵 Accuracy Trend Line (เส้นสีฟ้า)
+- แสดงเฉพาะชั่วโมงที่ปิดไปแล้ว (Completed Hours)
+- ไม่รวมจุด Real-time และ Forecast
+- แสดง % labels ทุกจุดอย่างชัดเจน
+- ตัวอย่าง: ถ้าเวลาปัจจุบันคือ 3:22 PM → เส้นจะหยุดที่ 3:00 PM
 
----
+### 🏷️ Data Labels
+- **ราคาทองคำ**: แสดงด้านบน (สีทอง/เขียว)
+- **Accuracy %**: แสดงด้านล่าง (สีฟ้า)
+- ไม่ทับซ้อนกัน พร้อมสีที่ตรงกับเส้นข้อมูล
 
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
----
-
-## ⚠️ Disclaimer
-
-**This software is for educational and demonstration purposes only.**
-
-- Not financial advice
-- Past performance does not guarantee future results
-- Always do your own research before trading
-- Use at your own risk
+### 📊 6H Performance History Table
+- Refresh อัตโนมัติทุกชั่วโมงตรง (2:00 PM, 3:00 PM...)
+- แสดงข้อมูลรายชั่วโมงที่สมบูรณ์
+- คำนวณ Accuracy แบบเรียลไทม์
 
 ---
 
-## 👨‍💻 Author
+## 🤝 การมีส่วนร่วม
+
+ยินดีรับการมีส่วนร่วม! กรุณาส่ง Pull Request ได้เลย
+
+1. Fork repository
+2. สร้าง feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit การเปลี่ยนแปลง (`git commit -m 'Add some AmazingFeature'`)
+4. Push ไปยัง branch (`git push origin feature/AmazingFeature`)
+5. เปิด Pull Request
+
+---
+
+## 📝 ใบอนุญาต
+
+โปรเจคนี้ได้รับอนุญาตภายใต้ MIT License - ดูรายละเอียดในไฟล์ LICENSE
+
+---
+
+## ⚠️ ข้อจำกัดความรับผิดชอบ
+
+**ซอฟต์แวร์นี้มีไว้เพื่อการศึกษาและสาธิตเท่านั้น**
+
+- ไม่ใช่คำแนะนำทางการเงิน
+- ผลการดำเนินงานในอดีตไม่รับประกันผลลัพธ์ในอนาคต
+- ควรศึกษาข้อมูลด้วยตนเองก่อนการเทรด
+- ใช้งานโดยความเสี่ยงของคุณเอง
+
+---
+
+## 👨‍💻 ผู้พัฒนา
 
 **Wittawat Lohamas**
 
@@ -240,19 +266,19 @@ AI/ML Predictive Analytics Demo
 
 ---
 
-## 🙏 Acknowledgments
+## 🙏 กิตติกรรมประกาศ
 
-- Yahoo Finance for market data API
-- CNBC for news feeds
-- Chart.js for visualization library
-- The open-source community
-
----
-
-## 📧 Contact
-
-For questions or feedback, please open an issue on GitHub.
+- Yahoo Finance สำหรับ API ข้อมูลตลาด
+- CNBC สำหรับฟีดข่าว
+- Chart.js สำหรับไลบรารีการแสดงผล
+- ชุมชน Open-source
 
 ---
 
-**⭐ If you find this project useful, please consider giving it a star!**
+## 📧 ติดต่อ
+
+สำหรับคำถามหรือข้อเสนอแนะ กรุณาเปิด issue บน GitHub
+
+---
+
+**⭐ หากคุณพบว่าโปรเจคนี้มีประโยชน์ กรุณาพิจารณาให้ดาว!**

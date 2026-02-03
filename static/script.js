@@ -158,14 +158,20 @@ function updateChart(data) {
     const historyData = fullActuals.slice(chartSlice);
     const predictionData = fullPredictions.slice(chartSlice);
 
-    // Store base price for "Real Time" jitter animation
-    if (historyData.length >= 2) {
-        window.lastActualPrice = historyData[historyData.length - 2];
-    }
+    // Calculate Performance Data for Accuracy Chart
+    // Line 1: Actual (Target) = Always 100%
+    // Line 2: Predicted = Model Accuracy %
+    const actualPerf = labels.map(() => 100);
+    const predictedPerf = labels.map((_, i) => {
+        const actual = historyData[i];
+        const predicted = predictionData[i];
+        if (actual === null || predicted === null || actual === 0) return null;
+        const diff = Math.abs(actual - predicted);
+        return Math.max(0, 100 - (diff / actual * 100));
+    });
 
-    const allValues = [...historyData.filter(v => v !== null), ...predictionData.filter(v => v !== null)];
-    const yMin = Math.min(...allValues) * 0.998;
-    const yMax = Math.max(...allValues) * 1.002;
+    const yMin = 0;
+    const yMax = 100;
 
     if (typeof ChartDataLabels !== 'undefined') {
         Chart.register(ChartDataLabels);
@@ -173,8 +179,8 @@ function updateChart(data) {
 
     if (priceChart) {
         priceChart.data.labels = labels;
-        priceChart.data.datasets[0].data = historyData;
-        priceChart.data.datasets[1].data = predictionData;
+        priceChart.data.datasets[0].data = actualPerf;
+        priceChart.data.datasets[1].data = predictedPerf;
         priceChart.options.scales.y.min = yMin;
         priceChart.options.scales.y.max = yMax;
         priceChart.update();
@@ -185,28 +191,25 @@ function updateChart(data) {
                 labels: labels,
                 datasets: [
                     {
-                        label: 'Actual Price',
-                        data: historyData,
+                        label: 'Actual (Target 100%)',
+                        data: actualPerf,
                         borderColor: '#FFD700',
-                        backgroundColor: 'rgba(255, 215, 0, 0.1)',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#fff',
-                        pointRadius: 3,
-                        pointBorderWidth: 2,
-                        tension: 0.3,
-                        fill: true,
-                        spanGaps: true
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        tension: 0,
+                        fill: false
                     },
                     {
-                        label: 'AI Model (Backtest & Forecast)',
-                        data: predictionData,
+                        label: 'AI prediction Performance (%)',
+                        data: predictedPerf,
                         borderColor: '#4dFF4d',
-                        borderDash: [5, 5],
-                        borderWidth: 2,
+                        backgroundColor: 'rgba(77, 255, 77, 0.1)',
+                        borderWidth: 3,
                         pointBackgroundColor: '#4dFF4d',
-                        pointRadius: 3,
+                        pointRadius: 4,
                         tension: 0.3,
-                        fill: false,
+                        fill: true,
                         spanGaps: true
                     }
                 ]
@@ -228,21 +231,13 @@ function updateChart(data) {
                             size: 10,
                             weight: '600'
                         },
-                        formatter: function (value) {
-                            return value ? '$' + value.toFixed(1) : '';
+                        formatter: function (value, context) {
+                            if (context.datasetIndex === 0) return ''; // Hide 100% labels
+                            return value ? value.toFixed(1) + '%' : '';
                         },
                         display: function (context) {
-                            const index = context.dataIndex;
-                            const datasetIndex = context.datasetIndex;
-                            const count = context.chart.data.labels.length;
-
-                            // Show Actual Value only for the 'Current' point (second to last)
-                            if (datasetIndex === 0) return index === count - 2;
-
-                            // Show Prediction Value only for the 'Forecast' point (last)
-                            if (datasetIndex === 1) return index === count - 1;
-
-                            return false;
+                            // Show Accuracy for AI Prediction points only
+                            return context.datasetIndex === 1 && context.dataset.data[context.dataIndex] !== null;
                         }
                     }
                 },
@@ -256,9 +251,15 @@ function updateChart(data) {
                 },
                 scales: {
                     y: {
-                        beginAtZero: false,
+                        beginAtZero: true,
+                        min: 0,
+                        max: 100,
                         grid: { color: 'rgba(255,255,255,0.05)' },
-                        ticks: { color: '#a1a1a1' }
+                        ticks: {
+                            color: '#a1a1a1',
+                            stepSize: 20,
+                            callback: function (value) { return value + '%'; }
+                        }
                     },
                     x: {
                         type: 'time',
@@ -301,30 +302,18 @@ function updateChart(data) {
                 const totalJitter = streamOscillation + microNoise;
 
                 const cur_L = priceChart.data.labels.length;
+
                 if (cur_L >= 2) {
-                    // Update Actual Price point with jitter and REAL-TIME X-axis position
-                    if (window.lastActualPrice) {
-                        priceChart.data.datasets[0].data[cur_L - 2] = window.lastActualPrice + totalJitter;
-                        // Move horizontally to exact real-time position
-                        priceChart.data.labels[cur_L - 2] = now;
-                    }
                     const glowEffect = {
-                        radius: 7 + (3 * (1 - pulse)), // Size 7 to 10 (matching 10px LIVE dot)
-                        alpha: 0.1 + (0.9 * (1 - pulse)), // Opacity 0.1 to 1.0
-                        glow: 2 + (8 * (1 - pulse)) // Glow effect
+                        radius: 8,
+                        alpha: 0.1 + (0.9 * (1 - pulse)),
+                        glow: 2 + (8 * (1 - pulse))
                     };
 
-                    // Dataset 0: Actual Price (second-to-last point)
-                    priceChart.data.datasets[0].pointRadius = (c) => (c.dataIndex === cur_L - 2) ? glowEffect.radius : 3;
-                    priceChart.data.datasets[0].pointBackgroundColor = (c) => (c.dataIndex === cur_L - 2) ? `rgba(255, 215, 0, ${glowEffect.alpha})` : '#FFD700';
-                    priceChart.data.datasets[0].pointBorderWidth = (c) => (c.dataIndex === cur_L - 2) ? glowEffect.glow : 1;
-                    priceChart.data.datasets[0].pointBorderColor = (c) => (c.dataIndex === cur_L - 2) ? `rgba(255, 215, 0, ${glowEffect.alpha * 0.3})` : 'rgba(255, 215, 0, 0.2)';
-
-                    // Dataset 1: AI Forecast (last point)
-                    priceChart.data.datasets[1].pointRadius = (c) => (c.dataIndex === cur_L - 1) ? glowEffect.radius : 3;
-                    priceChart.data.datasets[1].pointBackgroundColor = (c) => (c.dataIndex === cur_L - 1) ? `rgba(77, 255, 77, ${glowEffect.alpha})` : '#4dFF4d';
-                    priceChart.data.datasets[1].pointBorderWidth = (c) => (c.dataIndex === cur_L - 1) ? glowEffect.glow : 0;
-                    priceChart.data.datasets[1].pointBorderColor = (c) => (c.dataIndex === cur_L - 1) ? `rgba(77, 255, 77, ${glowEffect.alpha * 0.3})` : 'transparent';
+                    // Pulse for AI Prediction Accuracy (Dataset 1)
+                    priceChart.data.datasets[1].pointRadius = (c) => (c.dataIndex === cur_L - 2) ? glowEffect.radius : 4;
+                    priceChart.data.datasets[1].pointBackgroundColor = (c) => (c.dataIndex === cur_L - 2) ? `rgba(77, 255, 77, ${glowEffect.alpha})` : '#4dFF4d';
+                    priceChart.data.datasets[1].pointBorderWidth = (c) => (c.dataIndex === cur_L - 2) ? glowEffect.glow : 1;
                 }
                 priceChart.update('none');
             }

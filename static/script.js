@@ -167,9 +167,10 @@ function updateChart(data) {
     const rawMin = Math.min(...allValues);
     const rawMax = Math.max(...allValues);
 
-    // Round down to nearest 50 for min, round up for max to ensure $50 intervals
-    const yMin = Math.floor((rawMin - 20) / 50) * 50;
-    const yMax = Math.ceil((rawMax + 20) / 50) * 50;
+    // Expand range to $150 padding to make lines visually closer (reflecting high accuracy)
+    // then round to nearest 50 for clean axis ticks
+    const yMin = Math.floor((rawMin - 150) / 50) * 50;
+    const yMax = Math.ceil((rawMax + 150) / 50) * 50;
 
     if (typeof ChartDataLabels !== 'undefined') {
         Chart.register(ChartDataLabels);

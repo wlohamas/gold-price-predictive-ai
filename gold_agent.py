@@ -312,7 +312,7 @@ class GoldAgent:
         """Institutional scoring system: EMA + RSI + News + DXY (0-100 scale)."""
         try:
             current_price, data, dxy_price = self.fetch_current_price()
-            if data is None or len(data) < 30:
+            if data is None or len(data) < 12:
                 return None
             
             # 1. TREND ANALYSIS (50 points) - EMA Crossover

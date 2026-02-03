@@ -277,9 +277,13 @@ function updateChart(data) {
                     },
                     tooltip: {
                         enabled: true,
-                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.95)',
                         titleColor: '#fff',
-                        bodyColor: '#fff',
+                        bodyColor: function (context) {
+                            // Use dataset color for better visibility
+                            const colors = ['#FFD700', '#4dFF4d', '#00d2ff'];
+                            return colors[context.datasetIndex] || '#fff';
+                        },
                         borderColor: '#00d2ff',
                         borderWidth: 2,
                         padding: 12,
@@ -289,8 +293,8 @@ function updateChart(data) {
                             weight: 'bold'
                         },
                         bodyFont: {
-                            size: 13,
-                            weight: '600'
+                            size: 14,
+                            weight: 'bold'
                         },
                         callbacks: {
                             title: function (context) {

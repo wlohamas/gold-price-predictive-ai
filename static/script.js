@@ -1,15 +1,23 @@
 const ctx = document.getElementById('priceChart').getContext('2d');
 let priceChart;
 
-// Digital Clock Update
+// Digital Clock & Hourly Refresh Tracker
+let lastTableRefreshHour = new Date().getHours();
+
 setInterval(() => {
     const now = new Date();
-    // Offset for Bangkok if local time isn't already UTC+7 (for display consistency)
-    // Actually simpler: just use a formatter for the UI clock
     const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false, timeZone: 'Asia/Bangkok' };
     const timeString = new Intl.DateTimeFormat('en-US', options).format(now);
     const clockEl = document.getElementById('digital-clock');
     if (clockEl) clockEl.innerText = timeString;
+
+    // Check for Hourly Transition
+    const currentHour = now.getHours();
+    if (currentHour !== lastTableRefreshHour) {
+        console.log(`New hour detected (${currentHour}:00). Refreshing History Table...`);
+        lastTableRefreshHour = currentHour;
+        fetchData(); // Trigger immediate fetch to sync new hourly data
+    }
 }, 1000);
 
 async function fetchData() {
@@ -408,9 +416,13 @@ function updateHistoryTable(labels, actuals, predictions) {
     const nowMs = Date.now();
     const historyEntries = [];
 
+    // Strictly take only hourly points (timestamps ending in 00:00) 
+    // and filter out future or extremely fresh points
     for (let i = 0; i < labels.length; i++) {
-        // Only take points that are strictly in the historical group (before the real-time point)
-        if (labels[i] < nowMs - 120000) {
+        const date = new Date(labels[i]);
+        const isHourly = date.getMinutes() === 0;
+
+        if (isHourly && labels[i] < nowMs - 60000) {
             historyEntries.push({
                 ts: labels[i],
                 actual: actuals[i],
@@ -419,10 +431,14 @@ function updateHistoryTable(labels, actuals, predictions) {
         }
     }
 
-    // Show 6 latest historical entries
-    const displayList = historyEntries.slice(-6).reverse();
+    // Show 6 latest historical hourly entries (e.g., 2:00 PM, 1:00 PM...)
+    // Sorting to ensure correct sequence
+    const uniqueEntries = Array.from(new Set(historyEntries.map(e => e.ts)))
+        .map(ts => historyEntries.find(e => e.ts === ts))
+        .sort((a, b) => b.ts - a.ts)
+        .slice(0, 6);
 
-    displayList.forEach(entry => {
+    uniqueEntries.forEach(entry => {
         const timeStr = formatter.format(new Date(entry.ts));
         const actual = entry.actual;
         const predicted = entry.predicted;
@@ -433,8 +449,8 @@ function updateHistoryTable(labels, actuals, predictions) {
         const accuracy = Math.max(0, 100 - (diff / actual * 100));
 
         let accClass = 'acc-mid';
-        if (accuracy > 99) accClass = 'acc-high';
-        else if (accuracy < 97) accClass = 'acc-low';
+        if (accuracy > 99.5) accClass = 'acc-high';
+        else if (accuracy < 98) accClass = 'acc-low';
 
         const row = document.createElement('tr');
         row.innerHTML = `

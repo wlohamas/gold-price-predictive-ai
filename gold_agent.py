@@ -105,7 +105,7 @@ class GoldAgent:
             # Use xml parser for Atom feed
             soup = BeautifulSoup(resp.content, "xml")
             
-            entries = soup.find_all('entry')[:5]
+            entries = soup.find_all('entry')[:4]
             
             structured_news = []
             pos_keywords = ['up', 'rise', 'cut', 'war', 'tension', 'higher', 'gain', 'safe-haven', 'surge', 'bullish']
@@ -148,7 +148,7 @@ class GoldAgent:
                     "title": "Market awaiting fresh catalysts for Gold direction",
                     "impact": "Neutral",
                     "summary_th": "ตลาดกำลังรอปัจจัยใหม่เพื่อกำหนดทิศทางของราคาทองคำ",
-                    "link": "https://www.google.com/alerts/feeds/17320980821661560490/8904461684684252372"
+                    "link": "https://news.google.com/search?q=gold+price"
                 }]
 
             # 2. Asian Market Specific Logic

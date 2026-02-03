@@ -94,28 +94,30 @@ class GoldAgent:
             return []
 
     def analyze_market_sentiment_premium(self):
-        """Fetches news headlines from Investing.com and integrates Asian Market Logic."""
+        """Fetches news headlines from Google Alerts Atom Feed."""
         try:
-            # 1. Scrape Investing.com Gold News (Top 3)
-            url = "https://www.investing.com/commodities/gold-news"
+            # 1. Parse Google Alerts Feed
+            url = "https://www.google.com/alerts/feeds/17320980821661560490/8904461684684252372"
             headers = {
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
             }
             resp = requests.get(url, headers=headers, timeout=10)
-            soup = BeautifulSoup(resp.content, "html.parser")
+            # Use xml parser for Atom feed
+            soup = BeautifulSoup(resp.content, "xml")
             
-            # Find news items specific to the new Gold News page
-            news_items = soup.select('a[data-test="article-title-link"]')[:5]
+            entries = soup.find_all('entry')[:5]
             
             structured_news = []
             pos_keywords = ['up', 'rise', 'cut', 'war', 'tension', 'higher', 'gain', 'safe-haven', 'surge', 'bullish']
             neg_keywords = ['fall', 'strong dollar', 'inflation', 'lower', 'negative', 'rate hike', 'hawk', 'drop', 'bearish']
             
-            for item in news_items:
-                title = item.get_text(strip=True)
-                link = item.get('href', '#')
-                if link.startswith('/'):
-                    link = "https://www.investing.com" + link
+            for entry in entries:
+                title_raw = entry.find('title').get_text()
+                # Remove HTML tags often found in Google Alert titles
+                title = BeautifulSoup(title_raw, "html.parser").get_text(strip=True)
+                
+                link_tag = entry.find('link')
+                link = link_tag.get('href', '#') if link_tag else '#'
                 
                 h_low = title.lower()
                 impact = "Neutral"
@@ -140,13 +142,13 @@ class GoldAgent:
                     "link": link
                 })
             
-            # If scraping failed or empty, fallback to basic list
+            # If parsing failed or empty, fallback to basic list
             if not structured_news:
                 structured_news = [{
                     "title": "Market awaiting fresh catalysts for Gold direction",
                     "impact": "Neutral",
                     "summary_th": "ตลาดกำลังรอปัจจัยใหม่เพื่อกำหนดทิศทางของราคาทองคำ",
-                    "link": "https://www.investing.com/commodities/gold-news"
+                    "link": "https://www.google.com/alerts/feeds/17320980821661560490/8904461684684252372"
                 }]
 
             # 2. Asian Market Specific Logic

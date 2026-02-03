@@ -31,8 +31,12 @@ locked_forecast = {
 news_cache = []
 last_news_refresh = 0
 
+# Add hourly snapshots storage (locked values at top of each hour)
+hourly_snapshots = {}
+# Format: {hour_timestamp: {"actual": price, "predicted": forecast_price}}
+
 def job():
-    global last_email_time, locked_forecast, news_cache, last_news_refresh
+    global last_email_time, locked_forecast, news_cache, last_news_refresh, hourly_snapshots
     print(f"[{datetime.datetime.now()}] Running high-precision job...")
     agent = GoldAgent()
     
@@ -121,12 +125,38 @@ def job():
             forecast_ts = forecast_dt.replace(minute=0, second=0, microsecond=0).timestamp()
 
             # Filter yf labels to only those strictly before 'now'
-            # Reducing buffer to 10s to ensure the current hour's 'Open' candle 
-            # (e.g., 15:00:00) is included even if it's just 15:00:15 now.
             valid_indices = [i for i, ts in enumerate(labels) if ts < now_ts - 10] 
             f_labels = [labels[i] for i in valid_indices]
             f_actuals = [actuals[i] for i in valid_indices]
             f_backtest_preds = [backtest_preds[i] for i in valid_indices]
+
+            # HOURLY SNAPSHOT LOCKING SYSTEM
+            # Lock snapshots for each completed hour
+            for i in range(len(f_labels)):
+                label_dt = datetime.datetime.fromtimestamp(f_labels[i], tz=datetime.timezone.utc)
+                # Round to top of hour
+                hour_dt = label_dt.replace(minute=0, second=0, microsecond=0)
+                hour_ts = hour_dt.timestamp()
+                
+                # If this is a top-of-hour point and not yet locked, lock it
+                if label_dt.minute <= 5 and hour_ts not in hourly_snapshots:
+                    hourly_snapshots[hour_ts] = {
+                        "actual": f_actuals[i],
+                        "predicted": f_backtest_preds[i]
+                    }
+                    bangkok_time = hour_dt + datetime.timedelta(hours=7)
+                    print(f"🔒 LOCKED SNAPSHOT for {bangkok_time.strftime('%H:%M')}: Actual=${f_actuals[i]:.2f}, Predicted=${f_backtest_preds[i]:.2f}")
+            
+            # Replace historical data with locked snapshots
+            for i in range(len(f_labels)):
+                label_dt = datetime.datetime.fromtimestamp(f_labels[i], tz=datetime.timezone.utc)
+                hour_dt = label_dt.replace(minute=0, second=0, microsecond=0)
+                hour_ts = hour_dt.timestamp()
+                
+                # If we have a locked snapshot for this hour, use it
+                if hour_ts in hourly_snapshots:
+                    f_actuals[i] = hourly_snapshots[hour_ts]["actual"]
+                    f_backtest_preds[i] = hourly_snapshots[hour_ts]["predicted"]
 
             latest_data["chart"] = {
                 "labels": f_labels + [now_ts, forecast_ts],

@@ -539,6 +539,9 @@ function updateHistoryTable(labels, actuals, predictions) {
             <td class="${accClass}">${accuracy.toFixed(2)}%</td>
         `;
         tableBody.appendChild(row);
+
+        // Console log for verification
+        console.log(`History Table: ${timeStr} - Actual: $${actual.toFixed(2)}, Predicted: $${predicted.toFixed(2)}, Accuracy: ${accuracy.toFixed(2)}%`);
     });
 }
 

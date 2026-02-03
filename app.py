@@ -44,7 +44,7 @@ def job():
     # 1. Institutional Grade Analysis
     try:
         precision_data = agent.institutional_grade_analysis(news_cache=current_news)
-        if current_news is None: # We fetched fresh news
+        if precision_data and current_news is None: # We fetched fresh news
             news_cache = precision_data['market_news']
             last_news_refresh = now_ts
             latest_data["news_last_updated"] = datetime.datetime.fromtimestamp(now_ts).strftime('%H:%M:%S')

@@ -150,10 +150,10 @@ function updateChart(data) {
     const fullActuals = data.chart.prices;
     const fullPredictions = data.chart.prediction_point;
 
-    // Slice for Chart display: Show only latest 5 points (e.g. 4 hours history + 1 now + 1 forecast = condensed)
-    // To show exactly 5 points as requested:
+    // Slice for Chart display: Show only latest 5 points.
+    // Safety check: ensure chartSlice is at least 0.
     const L = data.chart.labels.length;
-    const chartSlice = L - 5;
+    const chartSlice = Math.max(0, L - 5);
     const labels = fullLabels.slice(chartSlice);
     const historyData = fullActuals.slice(chartSlice);
     const predictionData = fullPredictions.slice(chartSlice);

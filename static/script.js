@@ -230,10 +230,12 @@ function updateChart(data) {
                         label: 'Accuracy Trend (%)',
                         data: accuracyTrendData,
                         yAxisID: 'y2',
-                        borderColor: 'rgba(77, 255, 77, 0.5)',
-                        backgroundColor: 'rgba(77, 255, 77, 0.05)',
-                        borderWidth: 1.5,
-                        pointRadius: 0,
+                        borderColor: '#00d2ff',
+                        backgroundColor: 'rgba(0, 210, 255, 0.05)',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#00d2ff',
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
                         tension: 0.4,
                         fill: true,
                         spanGaps: true
@@ -258,13 +260,16 @@ function updateChart(data) {
                             weight: '600'
                         },
                         formatter: function (value, context) {
-                            if (context.datasetIndex === 2) return ''; // Hide labels for accuracy trend
+                            if (context.datasetIndex === 2) return value ? value.toFixed(1) + '%' : '';
                             return value ? '$' + value.toFixed(1) : '';
                         },
                         display: function (context) {
                             const index = context.dataIndex;
                             const datasetIndex = context.datasetIndex;
                             const count = context.chart.data.labels.length;
+
+                            // Show Accuracy labels for all points on the trend line
+                            if (datasetIndex === 2) return context.dataset.data[index] !== null;
 
                             // Show Actual Value only for the 'Current' point (second to last)
                             if (datasetIndex === 0) return index === count - 2;

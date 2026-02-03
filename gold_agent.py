@@ -35,18 +35,19 @@ class GoldAgent:
             gold = yf.Ticker(self.ticker)
             data = gold.history(period="1d", interval="1m")
             
-            if data.empty:
+            # If 1m data is insufficient (e.g. early morning), try 1h data
+            if data is None or len(data) < 24:
                  data = gold.history(period="5d", interval="1h")
             
-            # Fallback to GLD if GC=F is completely unavailable
-            if data.empty:
-                print(f"Ticker {self.ticker} unavailable, trying fallback GLD...")
+            # Fallback to GLD if primarty symbol is still insufficient
+            if data is None or len(data) < 24:
+                print(f"Ticker {self.ticker} data insufficient ({len(data) if data is not None else 0} rows), trying fallback GLD...")
                 gold = yf.Ticker("GLD")
                 data = gold.history(period="1d", interval="1m")
-                if data.empty:
+                if data is None or len(data) < 24:
                     data = gold.history(period="5d", interval="1h")
             
-            if not data.empty:
+            if data is not None and not data.empty:
                 current_price = data["Close"].iloc[-1]
                 return current_price, data, dxy_price
             else:

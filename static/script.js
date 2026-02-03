@@ -172,7 +172,11 @@ function updateChart(data) {
     }
 
     // Calculate Accuracy Trend Data (%)
+    // Only show accuracy for COMPLETED hours (not the current real-time point or forecast)
     const accuracyTrendData = labels.map((_, i) => {
+        // Skip the last 2 points: current real-time (index L-2) and forecast (index L-1)
+        if (i >= labels.length - 2) return null;
+
         const actual = historyData[i];
         const predicted = predictionData[i];
         if (actual === null || predicted === null || actual === 0) return null;
@@ -284,9 +288,8 @@ function updateChart(data) {
                             const datasetIndex = context.datasetIndex;
                             const count = context.chart.data.labels.length;
 
-                            // Show Accuracy label ONLY for the 'Best/Latest' point (second to last)
-                            // This keeps the chart clean, showing only the current performance.
-                            if (datasetIndex === 2) return index === count - 2 && context.dataset.data[index] !== null;
+                            // Show Accuracy labels for ALL points on the trend line (completed hours only)
+                            if (datasetIndex === 2) return context.dataset.data[index] !== null;
 
                             // Show Actual Value only for the 'Current' point (second to last)
                             if (datasetIndex === 0) return index === count - 2;

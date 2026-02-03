@@ -221,6 +221,8 @@ function updateChart(data) {
                         pointBackgroundColor: '#fff',
                         pointRadius: 3,
                         pointBorderWidth: 2,
+                        pointHoverRadius: 8,
+                        pointHoverBorderWidth: 3,
                         tension: 0.3,
                         fill: true,
                         spanGaps: true
@@ -234,6 +236,8 @@ function updateChart(data) {
                         borderWidth: 2,
                         pointBackgroundColor: '#4dFF4d',
                         pointRadius: 3,
+                        pointHoverRadius: 8,
+                        pointHoverBorderWidth: 3,
                         tension: 0.3,
                         fill: false,
                         spanGaps: true
@@ -247,7 +251,8 @@ function updateChart(data) {
                         borderWidth: 2,
                         pointBackgroundColor: '#00d2ff',
                         pointRadius: 3,
-                        pointHoverRadius: 5,
+                        pointHoverRadius: 8,
+                        pointHoverBorderWidth: 3,
                         tension: 0.4,
                         fill: true,
                         spanGaps: true
@@ -261,7 +266,65 @@ function updateChart(data) {
                     duration: 0
                 },
                 plugins: {
-                    legend: { labels: { color: '#a1a1a1' } },
+                    legend: {
+                        labels: {
+                            color: '#a1a1a1',
+                            font: {
+                                size: 12,
+                                weight: '600'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                        titleColor: '#fff',
+                        bodyColor: '#fff',
+                        borderColor: '#00d2ff',
+                        borderWidth: 2,
+                        padding: 12,
+                        displayColors: true,
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 13,
+                            weight: '600'
+                        },
+                        callbacks: {
+                            title: function (context) {
+                                const date = new Date(context[0].parsed.x);
+                                const options = { hour: 'numeric', minute: '2-digit', hour12: true };
+                                return date.toLocaleTimeString('en-US', options);
+                            },
+                            label: function (context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    // Format based on dataset
+                                    if (context.datasetIndex === 2) {
+                                        // Accuracy Trend
+                                        label += context.parsed.y.toFixed(2) + '%';
+                                    } else {
+                                        // Price data
+                                        label += '$' + context.parsed.y.toFixed(2);
+                                    }
+                                }
+                                return label;
+                            },
+                            labelColor: function (context) {
+                                return {
+                                    borderColor: context.dataset.borderColor,
+                                    backgroundColor: context.dataset.borderColor,
+                                    borderWidth: 2,
+                                    borderRadius: 2
+                                };
+                            }
+                        }
+                    },
                     datalabels: {
                         color: function (context) {
                             // Match label color to dataset color

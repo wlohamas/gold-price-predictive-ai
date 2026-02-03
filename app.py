@@ -27,14 +27,32 @@ locked_forecast = {
     "raw_trend": None
 }
 
+# Add news caching globals (1 minute refresh)
+news_cache = []
+last_news_refresh = 0
+
 def job():
-    global last_email_time, locked_forecast
+    global last_email_time, locked_forecast, news_cache, last_news_refresh
     print(f"[{datetime.datetime.now()}] Running high-precision job...")
     agent = GoldAgent()
     
+    # Check if we need to refresh news (every 60 seconds)
+    now_ts = time.time()
+    current_news = None
+    if now_ts - last_news_refresh < 60 and news_cache:
+        current_news = news_cache
+        print("Using cached news (refresh in progress...)")
+    else:
+        print("Refreshing NEWS from Investing.com...")
+        # news_cache will be updated inside institutional_grade_analysis if we don't pass current_news
+        pass
+
     # 1. Institutional Grade Analysis
     try:
-        precision_data = agent.institutional_grade_analysis()
+        precision_data = agent.institutional_grade_analysis(news_cache=current_news)
+        if current_news is None: # We fetched fresh news
+            news_cache = precision_data['market_news']
+            last_news_refresh = now_ts
     except Exception as e:
         print(f"Institutional analysis error in job: {e}")
         return

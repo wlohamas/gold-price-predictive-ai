@@ -116,6 +116,10 @@ class GoldAgent:
                 if not title_tag: continue
                 
                 title = title_tag.get_text(strip=True)
+                link = title_tag.get('href', '#')
+                if link.startswith('/'):
+                    link = "https://www.investing.com" + link
+                
                 h_low = title.lower()
                 impact = "Neutral"
                 if any(kw in h_low for kw in pos_keywords): impact = "Positive"
@@ -135,7 +139,8 @@ class GoldAgent:
                 structured_news.append({
                     "title": title,
                     "impact": impact,
-                    "summary_th": summary_th
+                    "summary_th": summary_th,
+                    "link": link
                 })
             
             # If scraping failed or empty, fallback to basic list
@@ -143,7 +148,8 @@ class GoldAgent:
                 structured_news = [{
                     "title": "Market awaiting fresh catalysts for Gold direction",
                     "impact": "Neutral",
-                    "summary_th": "ตลาดกำลังรอปัจจัยใหม่เพื่อกำหนดทิศทางของราคาทองคำ"
+                    "summary_th": "ตลาดกำลังรอปัจจัยใหม่เพื่อกำหนดทิศทางของราคาทองคำ",
+                    "link": "https://www.investing.com/news/commodities/gold"
                 }]
 
             # 2. Asian Market Specific Logic
@@ -292,7 +298,7 @@ class GoldAgent:
         
         return 0
     
-    def institutional_grade_analysis(self):
+    def institutional_grade_analysis(self, news_cache=None):
         """Institutional scoring system: EMA + RSI + News + DXY (0-100 scale)."""
         try:
             current_price, data, dxy_price = self.fetch_current_price()
@@ -307,7 +313,10 @@ class GoldAgent:
             rsi_points = self.check_rsi_alignment(data, trend_signal)
             
             # 3. NEWS SENTIMENT (15 points)
-            market_news = self.analyze_market_sentiment_premium()
+            if news_cache:
+                market_news = news_cache
+            else:
+                market_news = self.analyze_market_sentiment_premium()
             pos_count = sum(1 for n in market_news if n['impact'] == "Positive" or n['impact'] == "Bullish")
             neg_count = sum(1 for n in market_news if n['impact'] == "Negative" or n['impact'] == "Caution/Bearish")
             

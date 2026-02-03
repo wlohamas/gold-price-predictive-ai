@@ -105,7 +105,12 @@ async function fetchData() {
                         item.style.borderLeft = `4px solid ${impactColor}`;
                         item.style.background = 'rgba(255,255,255,0.02)';
                         item.style.fontSize = '0.9rem';
-                        item.innerHTML = `<b style="color: #fff">${news.title}</b> <span style="color: ${impactColor}; font-weight: bold;">[${news.impact}]</span><br>
+
+                        const newsLink = news.link || "https://www.investing.com/news/commodities/gold";
+                        item.innerHTML = `<a href="${newsLink}" target="_blank" style="text-decoration: none; display: block;">
+                                            <b style="color: #fff; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.1);">${news.title}</b>
+                                          </a>
+                                          <span style="color: ${impactColor}; font-weight: bold;">[${news.impact}]</span><br>
                                           <span style="color: #a1a1a1; font-size: 0.85rem;">${news.summary_th}</span>`;
                         newsList.appendChild(item);
                     });

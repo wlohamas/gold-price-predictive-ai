@@ -103,69 +103,74 @@ class GoldAgent:
             return []
 
     def analyze_market_sentiment_premium(self):
-        """Fetches news headlines from Google Alerts Atom Feed."""
+        """Fetches fresh news headlines specifically for Gold market."""
         try:
-            # 1. Parse Google Alerts Feed
-            url = "https://www.google.com/alerts/feeds/17320980821661560490/8904461684684252372"
+            # Switched to a more frequently updated search-based RSS for "Gold Price"
+            # Using Google News with 'when:1h' to ensure ONLY very fresh news
+            url = "https://news.google.com/rss/search?q=gold+price+market+analysis+when:12h&hl=en-US&gl=US&ceid=US:en"
+            
             headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
             }
             resp = requests.get(url, headers=headers, timeout=10)
-            # Use xml parser for Atom feed
             soup = BeautifulSoup(resp.content, "xml")
             
-            entries = soup.find_all('entry')[:4]
+            entries = soup.find_all('item')[:5] # Get top 5 to ensure variety
             
             structured_news = []
-            pos_keywords = ['up', 'rise', 'cut', 'war', 'tension', 'higher', 'gain', 'safe-haven', 'surge', 'bullish']
-            neg_keywords = ['fall', 'strong dollar', 'inflation', 'lower', 'negative', 'rate hike', 'hawk', 'drop', 'bearish']
+            pos_keywords = ['up', 'rise', 'cut', 'war', 'tension', 'higher', 'gain', 'safe-haven', 'surge', 'bullish', 'buying']
+            neg_keywords = ['fall', 'strong dollar', 'inflation', 'lower', 'negative', 'rate hike', 'hawk', 'drop', 'bearish', 'selling']
             
             for entry in entries:
-                title_raw = entry.find('title').get_text()
-                # Remove HTML tags often found in Google Alert titles
-                title = BeautifulSoup(title_raw, "html.parser").get_text(strip=True)
+                title = entry.find('title').get_text()
+                link = entry.find('link').get_text() if entry.find('link') else '#'
                 
-                link_tag = entry.find('link')
-                link = link_tag.get('href', '#') if link_tag else '#'
-                
+                # Check impact
                 h_low = title.lower()
                 impact = "Neutral"
                 if any(kw in h_low for kw in pos_keywords): impact = "Positive"
-                if any(kw in h_low for kw in neg_keywords): impact = "Negative"
+                elif any(kw in h_low for kw in neg_keywords): impact = "Negative"
                 
-                summary_th = title
-                # Simple keyword mapping for Thai summaries
+                # Clean title (Google News often adds source at the end like "- Reuters")
+                clean_title = title.split(' - ')[0] if ' - ' in title else title
+                
+                # Dynamic Thai Summarization with more variety
+                summary_th = clean_title
                 if "Fed" in title or "Federal Reserve" in title:
-                    summary_th = "ข่าวสารจาก Fed ส่งผลต่อความผันผวนของราคาทองคำ"
+                    summary_th = "นโยบายดอกเบี้ยของ Fed กำลังส่งแรงกดดันต่อทิศทางราคาทองคำ"
                 elif "Dollar" in title:
-                    summary_th = "ดัชนีดอลลาร์สหรัฐ (DXY) เป็นปัจจัยสำคัญในการกำหนดทิศทางราคา"
-                elif "Gold" in title:
-                    summary_th = "นักลงทุนจับตาความเคลื่อนไหวของราคาทองคำจากปัจจัยมหภาค"
-                elif "Middle East" in title or "Israel" in title or "Iran" in title:
-                    summary_th = "สถานการณ์ความตึงเครียดทางภูมิรัฐศาสตร์หนุนแรงซื้อสินทรัพย์ปลอดภัย"
+                    summary_th = "การเคลื่อนไหวของค่าเงินดอลลาร์สหรัฐ (DXY) กระทบต่อความต้องการทองคำ"
+                elif "Central Bank" in title:
+                    summary_th = "แรงซื้อจากธนาคารกลางต่างประเทศเป็นสัญญานเชิงบวกต่อราคา"
+                elif "Inflation" in title or "CPI" in title:
+                    summary_th = "ตัวเลขเงินเฟ้อสหรัฐฯ เป็นตัวแปรสำคัญที่นักลงทุนทองคำกำลังเฝ้าติดตาม"
+                elif "Geopolitical" in title or "War" in title or "Conflict" in title:
+                    summary_th = "ความเสี่ยงทางภูมิรัฐศาสตร์หนุนแรงซื้อทองคำในฐานะสินทรัพย์ปลอดภัย"
+                elif "RSI" in title or "Technical" in title:
+                    summary_th = "สัญญาณทางเทคนิคบ่งชี้ถึงโอกาสการปรับฐานหรือการไปต่อในระยะสั้น"
+                else:
+                    summary_th = f"จับตาประเด็น: {clean_title} ส่งผลต่อความผันผวนของตลาด"
                 
                 structured_news.append({
-                    "title": title,
+                    "title": clean_title,
                     "impact": impact,
                     "summary_th": summary_th,
                     "link": link
                 })
             
-            # If parsing failed or empty, fallback to basic list
-            if not structured_news:
-                structured_news = [{
-                    "title": "Market awaiting fresh catalysts for Gold direction",
-                    "impact": "Neutral",
-                    "summary_th": "ตลาดกำลังรอปัจจัยใหม่เพื่อกำหนดทิศทางของราคาทองคำ",
-                    "link": "https://news.google.com/search?q=gold+price"
-                }]
-
-            # 2. Asian Market Specific Logic
+            # Combine with Asian insights
             asian_news = self.analyze_asian_market_logic()
-            
-            # Combine: Dynamic News first, then Asian insights, limited to 4 items
             combined_news = structured_news + asian_news
-            return combined_news[:4]
+            
+            # Unique by title and return top 3 to ensure they are the ABSOLUTE LATEST
+            seen = set()
+            unique_news = []
+            for n in combined_news:
+                if n['title'] not in seen:
+                    unique_news.append(n)
+                    seen.add(n['title'])
+            
+            return unique_news[:3]
         except Exception as e:
             print(f"Market sentiment analysis error: {e}")
             return []

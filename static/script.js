@@ -480,21 +480,19 @@ function updateHistoryTable(labels, actuals, predictions, currentPrice, currentP
 
     tableBody.innerHTML = '';
 
-    // Convert ms back to localized HH:mm:ss for table
     const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Bangkok' };
     const formatter = new Intl.DateTimeFormat('en-US', timeOptions);
 
     const nowMs = Date.now();
     const historyEntries = [];
 
-    // Take hourly points (allow 0-5 min past the hour for safety)
-    // and filter out future or extremely fresh points
+    // Parse historical points from labels
     for (let i = 0; i < labels.length; i++) {
         const date = new Date(labels[i]);
-        // Relax check: 0-5 minutes past the hour.
-        const isHourly = date.getMinutes() >= 0 && date.getMinutes() <= 5;
+        // Treat as historical if it's strictly older than the current top-of-hour
+        const currentHourStart = new Date().setMinutes(0, 0, 0);
 
-        if (isHourly && labels[i] < nowMs - 5000) {
+        if (labels[i] <= currentHourStart) {
             historyEntries.push({
                 ts: labels[i],
                 actual: actuals[i],
@@ -503,20 +501,20 @@ function updateHistoryTable(labels, actuals, predictions, currentPrice, currentP
         }
     }
 
-    // Deduplicate by Hour and Sort
+    // Deduplicate and Sort
     const uniqueByHour = {};
     historyEntries.forEach(e => {
-        const hourTs = new Date(e.ts).setMinutes(0, 0, 0);
-        if (!uniqueByHour[hourTs] || e.ts > uniqueByHour[hourTs].ts) {
-            uniqueByHour[hourTs] = e;
+        const h = new Date(e.ts).setMinutes(0, 0, 0);
+        if (!uniqueByHour[h] || e.ts > uniqueByHour[h].ts) {
+            uniqueByHour[h] = e;
         }
     });
 
     const displayList = Object.values(uniqueByHour)
         .sort((a, b) => b.ts - a.ts)
-        .slice(0, 5);  // Show 5 historical hours (current hour will be added separately)
+        .slice(0, 6); // Grab more to be safe before slicing for display
 
-    // ADD CURRENT HOUR AT THE TOP (Real-time)
+    // 1. ADD CURRENT HOUR AT THE TOP (Real-time)
     if (currentPrice && currentPrediction) {
         const now = new Date();
         const currentHourStr = formatter.format(now);
@@ -528,25 +526,28 @@ function updateHistoryTable(labels, actuals, predictions, currentPrice, currentP
         else if (accuracy < 98) accClass = 'acc-low';
 
         const currentRow = document.createElement('tr');
-        currentRow.style.borderLeft = '3px solid #00d2ff';
-        currentRow.style.background = 'rgba(0, 210, 255, 0.05)';
+        currentRow.className = 'current-hour-row';
+        currentRow.style.borderLeft = '4px solid var(--cyan)';
+        currentRow.style.background = 'rgba(0, 210, 255, 0.08)';
         currentRow.innerHTML = `
-            <td style="font-weight: 700;">${currentHourStr} <span style="color: #00d2ff; font-size: 0.8em;">●</span></td>
-            <td style="font-weight: 700; color: #FFD700;">$${currentPrice.toFixed(2)}</td>
-            <td style="color: var(--cyan); font-weight: 600;">$${currentPrediction.toFixed(2)}</td>
-            <td class="${accClass}" style="font-weight: 700;">${accuracy.toFixed(2)}%</td>
+            <td style="font-weight: 800; color: #fff;">${currentHourStr} <span class="live-dot-small">●</span></td>
+            <td style="font-weight: 800; color: #FFD700;">$${currentPrice.toFixed(2)}</td>
+            <td style="color: var(--cyan); font-weight: 700;">$${currentPrediction.toFixed(2)}</td>
+            <td class="${accClass}" style="font-weight: 800; text-shadow: 0 0 10px rgba(0,210,255,0.3);">${accuracy.toFixed(2)}%</td>
         `;
         tableBody.appendChild(currentRow);
-        console.log(`History Table (CURRENT): ${currentHourStr} - Actual: $${currentPrice.toFixed(2)}, Predicted: $${currentPrediction.toFixed(2)}, Accuracy: ${accuracy.toFixed(2)}%`);
     }
 
-    // ADD HISTORICAL HOURS (Locked values)
+    // 2. ADD HISTORICAL HOURS (Locked values)
     displayList.forEach(entry => {
         const timeStr = formatter.format(new Date(entry.ts));
         const actual = entry.actual;
         const predicted = entry.predicted;
 
         if (actual === null || predicted === null) return;
+
+        // We allow the top-of-hour point to show even if it's the current hour
+        // so that 1:00 PM appears below the 1:39 PM Live row.
 
         const diff = Math.abs(actual - predicted);
         const accuracy = Math.max(0, 100 - (diff / actual * 100));
@@ -556,16 +557,14 @@ function updateHistoryTable(labels, actuals, predictions, currentPrice, currentP
         else if (accuracy < 98) accClass = 'acc-low';
 
         const row = document.createElement('tr');
+        row.style.opacity = '0.85';
         row.innerHTML = `
             <td>${timeStr}</td>
             <td style="font-weight: 600;">$${actual.toFixed(2)}</td>
-            <td style="color: var(--cyan);">$${predicted.toFixed(2)}</td>
-            <td class="${accClass}">${accuracy.toFixed(2)}%</td>
+            <td style="color: var(--cyan); opacity: 0.9;">$${predicted.toFixed(2)}</td>
+            <td class="${accClass}" style="opacity: 1;">${accuracy.toFixed(2)}%</td>
         `;
         tableBody.appendChild(row);
-
-        // Console log for verification
-        console.log(`History Table: ${timeStr} - Actual: $${actual.toFixed(2)}, Predicted: $${predicted.toFixed(2)}, Accuracy: ${accuracy.toFixed(2)}%`);
     });
 }
 

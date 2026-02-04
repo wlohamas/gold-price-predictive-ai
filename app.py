@@ -33,8 +33,57 @@ news_cache = []
 last_news_refresh = 0
 
 # Add hourly snapshots storage (locked values at top of each hour)
-hourly_snapshots = {}
-# Format: {hour_timestamp: {"actual": price, "predicted": forecast_price}}
+import json
+
+SNAPSHOTS_FILE = "snapshots.json"
+
+def load_snapshots():
+    if os.path.exists(SNAPSHOTS_FILE):
+        try:
+            with open(SNAPSHOTS_FILE, "r") as f:
+                data = json.load(f)
+                # Convert string keys back to floats (timestamps)
+                return {float(k): v for k, v in data.items()}
+        except:
+            return {}
+    return {}
+
+def save_snapshots(snapshots):
+    try:
+        # Convert float keys to strings for JSON
+        data = {str(k): v for k, v in snapshots.items()}
+        with open(SNAPSHOTS_FILE, "w") as f:
+            json.dump(data, f)
+    except Exception as e:
+        print(f"Error saving snapshots: {e}")
+
+hourly_snapshots = load_snapshots()
+
+# Add locked forecast persistence
+FORECAST_FILE = "locked_forecast.json"
+
+def load_forecast():
+    if os.path.exists(FORECAST_FILE):
+        try:
+            with open(FORECAST_FILE, "r") as f:
+                return json.load(f)
+        except:
+            pass
+    return {
+        "price": None,
+        "target_hour": None,
+        "raw_trend": None,
+        "confidence": None
+    }
+
+def save_forecast(forecast):
+    try:
+        with open(FORECAST_FILE, "w") as f:
+            json.dump(forecast, f)
+    except Exception as e:
+        print(f"Error saving forecast: {e}")
+
+locked_forecast = load_forecast()
 
 def job():
     global last_email_time, locked_forecast, news_cache, last_news_refresh, hourly_snapshots
@@ -52,7 +101,9 @@ def job():
         if precision_data and current_news is None: # We fetched fresh news
             news_cache = precision_data['market_news']
             last_news_refresh = now_ts
-            latest_data["news_last_updated"] = datetime.datetime.fromtimestamp(now_ts).strftime('%H:%M:%S')
+            # Use standard 12h format: e.g. "1:26 PM"
+            bangkok_now = datetime.datetime.utcnow() + datetime.timedelta(hours=7)
+            latest_data["news_last_updated"] = bangkok_now.strftime('%-I:%M %p')
     except Exception as e:
         print(f"Institutional analysis error in job: {e}")
         return
@@ -69,22 +120,56 @@ def job():
         # HOURLY LOCK LOGIC: 
         # Only update the 'predicted_price', 'trend', and 'confidence' once per hour
         if locked_forecast["target_hour"] != target_hour or locked_forecast["price"] is None:
+            # When we transition to a new hour (e.g., from 12:59 to 13:00)
+            # 1. Snapshot the hour that just FINISHED (e.g., the 12:00 PM to 1:00 PM period)
+            if locked_forecast["target_hour"] is not None:
+                # The hour that just finished started 1 hour ago
+                finished_hour_dt = bangkok_now.replace(minute=0, second=0, microsecond=0) - datetime.timedelta(hours=1)
+                finished_hour_utc = (finished_hour_dt - datetime.timedelta(hours=7)).replace(tzinfo=datetime.timezone.utc)
+                finished_hour_ts = finished_hour_utc.timestamp()
+                
+                # We compare the current_price (at 1:00 PM) to the forecast we had for 1:00 PM
+                if finished_hour_ts not in hourly_snapshots:
+                    hourly_snapshots[finished_hour_ts] = {
+                        "actual": current_price,
+                        "predicted": locked_forecast["price"]
+                    }
+                    save_snapshots(hourly_snapshots)
+                    print(f"🔒 HOUR COMPLETED & LOCKED: {finished_hour_dt.strftime('%H:%M')} -> Actual=${current_price:.2f}, Predicted=${locked_forecast['price']:.2f}")
+
+            # 2. Lock the NEW forecast for the upcoming hour (e.g., the 1:00 PM to 2:00 PM period)
             locked_forecast["price"] = precision_data.get('predicted_price', current_price)
             locked_forecast["target_hour"] = target_hour
             locked_forecast["raw_trend"] = precision_data['prediction']
-            locked_forecast["confidence"] = precision_data['confidence']  # Lock confidence score
-            print(f">>> [{bangkok_now}] New Hourly Forecast LOCKED: {target_hour}:00 Target = ${locked_forecast['price']:.2f}, Confidence = {locked_forecast['confidence']}%")
+            locked_forecast["confidence"] = precision_data['confidence']
+            save_forecast(locked_forecast)
+            print(f">>> [{bangkok_now}] New Hourly Forecast LOCKED: {target_hour}:00 Target = ${locked_forecast['price']:.2f}")
 
         # Use the locked values for the dashboard
         final_prediction_price = locked_forecast["price"]
         final_trend = locked_forecast["raw_trend"]
             
         # Update global state for API/Dashboard
+        # Calculate overall accuracy based on the last 6 LOCKED snapshots (Performance 6H)
+        recent_snapshots = sorted(hourly_snapshots.items(), key=lambda x: x[0], reverse=True)[:6]
+        if len(recent_snapshots) > 0:
+            total_acc = 0
+            for ts, snap in recent_snapshots:
+                act = snap["actual"]
+                pre = snap["predicted"]
+                diff = abs(act - pre)
+                total_acc += max(0, 100 - (diff / act * 100))
+            avg_accuracy = total_acc / len(recent_snapshots)
+            last_correct = abs(recent_snapshots[0][1]["actual"] - recent_snapshots[0][1]["predicted"]) < (recent_snapshots[0][1]["actual"] * 0.005) # Within 0.5%
+        else:
+            # Fallback to model backtest if no snapshots yet
+            avg_accuracy, last_correct = agent.get_model_accuracy()
+
         latest_data["price"] = current_price
         latest_data["prediction_raw"] = final_trend 
         latest_data["prediction"] = final_prediction_price
         latest_data["pct_change"] = ((final_prediction_price - current_price) / current_price) * 100
-        latest_data["accuracy"] = accuracy
+        latest_data["accuracy"] = avg_accuracy
         latest_data["last_correct"] = last_correct
         
         # Performance Reasoning Logic
@@ -132,33 +217,20 @@ def job():
             f_actuals = [actuals[i] for i in valid_indices]
             f_backtest_preds = [backtest_preds[i] for i in valid_indices]
 
-            # HOURLY SNAPSHOT LOCKING SYSTEM
-            # Lock snapshots for each completed hour
+            # HOURLY SNAPSHOT FETCH (Keep it consistent with our manual snapshots)
+            # We still fetch backtest for the chart points that aren't in our locked snapshots
             for i in range(len(f_labels)):
                 label_dt = datetime.datetime.fromtimestamp(f_labels[i], tz=datetime.timezone.utc)
-                # Round to top of hour
-                hour_dt = label_dt.replace(minute=0, second=0, microsecond=0)
-                hour_ts = hour_dt.timestamp()
+                hour_ts = label_dt.replace(minute=0, second=0, microsecond=0).timestamp()
                 
-                # If this is a top-of-hour point and not yet locked, lock it
-                if label_dt.minute <= 5 and hour_ts not in hourly_snapshots:
-                    hourly_snapshots[hour_ts] = {
-                        "actual": f_actuals[i],
-                        "predicted": f_backtest_preds[i]
-                    }
-                    bangkok_time = hour_dt + datetime.timedelta(hours=7)
-                    print(f"🔒 LOCKED SNAPSHOT for {bangkok_time.strftime('%H:%M')}: Actual=${f_actuals[i]:.2f}, Predicted=${f_backtest_preds[i]:.2f}")
-            
-            # Replace historical data with locked snapshots
-            for i in range(len(f_labels)):
-                label_dt = datetime.datetime.fromtimestamp(f_labels[i], tz=datetime.timezone.utc)
-                hour_dt = label_dt.replace(minute=0, second=0, microsecond=0)
-                hour_ts = hour_dt.timestamp()
-                
-                # If we have a locked snapshot for this hour, use it
+                # If we have a manually locked snapshot (more accurate for what user saw), use it
                 if hour_ts in hourly_snapshots:
                     f_actuals[i] = hourly_snapshots[hour_ts]["actual"]
                     f_backtest_preds[i] = hourly_snapshots[hour_ts]["predicted"]
+                else:
+                    # Otherwise, if we haven't locked it yet but it's clearly passed, 
+                    # we can use the backtest but we should really trust our snapshots more.
+                    pass
 
 
             # Get the locked forecast for the CURRENT hour (not next hour)
@@ -219,4 +291,4 @@ if __name__ == '__main__':
     # Start Flask server
     import os
     port = int(os.environ.get("PORT", 5001))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    app.run(host='0.0.0.0', port=port, debug=False)

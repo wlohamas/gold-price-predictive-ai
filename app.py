@@ -123,21 +123,21 @@ def job():
             # When we transition to a new hour (e.g., from 12:59 to 13:00)
             # 1. Snapshot the hour that just FINISHED (e.g., the 12:00 PM to 1:00 PM period)
             if locked_forecast["target_hour"] is not None:
-                # The hour that just finished started 1 hour ago
-                finished_hour_dt = bangkok_now.replace(minute=0, second=0, microsecond=0) - datetime.timedelta(hours=1)
+                # The hour that just reached its target (e.g., 2:00 PM hits, we lock 2:00 PM result)
+                finished_hour_dt = bangkok_now.replace(minute=0, second=0, microsecond=0)
                 finished_hour_utc = (finished_hour_dt - datetime.timedelta(hours=7)).replace(tzinfo=datetime.timezone.utc)
                 finished_hour_ts = finished_hour_utc.timestamp()
                 
-                # We compare the current_price (at 1:00 PM) to the forecast we had for 1:00 PM
+                # We compare the current_price (at 2:00 PM) to the forecast we had for 2:00 PM
                 if finished_hour_ts not in hourly_snapshots:
                     hourly_snapshots[finished_hour_ts] = {
                         "actual": current_price,
                         "predicted": locked_forecast["price"]
                     }
                     save_snapshots(hourly_snapshots)
-                    print(f"🔒 HOUR COMPLETED & LOCKED: {finished_hour_dt.strftime('%H:%M')} -> Actual=${current_price:.2f}, Predicted=${locked_forecast['price']:.2f}")
+                    print(f"🔒 HOUR REACHED & LOCKED: {finished_hour_dt.strftime('%H:%M')} -> Actual=${current_price:.2f}, Predicted=${locked_forecast['price']:.2f}")
 
-            # 2. Lock the NEW forecast for the upcoming hour (e.g., the 1:00 PM to 2:00 PM period)
+            # 2. Lock the NEW forecast for the upcoming hour (e.g., the 2:00 PM to 3:00 PM period)
             locked_forecast["price"] = precision_data.get('predicted_price', current_price)
             locked_forecast["target_hour"] = target_hour
             locked_forecast["raw_trend"] = precision_data['prediction']
@@ -160,10 +160,12 @@ def job():
                 diff = abs(act - pre)
                 total_acc += max(0, 100 - (diff / act * 100))
             avg_accuracy = total_acc / len(recent_snapshots)
-            last_correct = abs(recent_snapshots[0][1]["actual"] - recent_snapshots[0][1]["predicted"]) < (recent_snapshots[0][1]["actual"] * 0.005) # Within 0.5%
+            is_correct = abs(recent_snapshots[0][1]["actual"] - recent_snapshots[0][1]["predicted"]) < (recent_snapshots[0][1]["actual"] * 0.005) # Within 0.5%
+            last_correct = "Correct" if is_correct else "Incorrect"
         else:
             # Fallback to model backtest if no snapshots yet
-            avg_accuracy, last_correct = agent.get_model_accuracy()
+            avg_accuracy, is_correct = agent.get_model_accuracy()
+            last_correct = "Correct" if is_correct else "Incorrect"
 
         latest_data["price"] = current_price
         latest_data["prediction_raw"] = final_trend 
@@ -173,11 +175,11 @@ def job():
         latest_data["last_correct"] = last_correct
         
         # Performance Reasoning Logic
-        if accuracy >= 90:
+        if avg_accuracy >= 90:
             latest_data["accuracy_reason"] = "โมเดลจับทิศทางตลาดได้แม่นยำสูงในสภาวะแนวโน้มชัดเจน"
-        elif accuracy >= 70:
+        elif avg_accuracy >= 70:
             latest_data["accuracy_reason"] = "โมเดลทำงานได้ดีท่ามกลางความผันผวนปกติของตลาด"
-        elif accuracy >= 50:
+        elif avg_accuracy >= 50:
             latest_data["accuracy_reason"] = "ตลาดมีความผันผวนสูงกว่าปกติ กระทบต่อความแม่นยำรายชั่วโมง"
         else:
             latest_data["accuracy_reason"] = "ตลาดอยู่ในช่วงเปลี่ยนเทรดรวดเร็ว โมเดลอยู่ระหว่างการเรียนรู้รูปแบบใหม่"

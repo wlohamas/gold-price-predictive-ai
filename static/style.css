@@ -73,13 +73,22 @@ header h1 {
     letter-spacing: -0.5px;
 }
 
-header p {
-    color: var(--text-secondary);
+header p.signature {
+    background: linear-gradient(90deg, #FFD700 0%, var(--cyan) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
     margin-bottom: 2.5rem;
-    font-size: 0.85rem;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    font-weight: 300;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    font-weight: 700;
+    text-transform: none;
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-radius: 50px;
+    background-color: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 0 20px rgba(0, 210, 255, 0.1);
 }
 
 .card-grid {

@@ -512,7 +512,7 @@ function updateHistoryTable(labels, actuals, predictions, currentPrice, currentP
 
     const displayList = Object.values(uniqueByHour)
         .sort((a, b) => b.ts - a.ts)
-        .slice(0, 6); // Grab more to be safe before slicing for display
+        .slice(0, 5); // Show 5 historical rows (Live row makes it 6 total)
 
     // 1. ADD CURRENT HOUR AT THE TOP (Real-time)
     if (currentPrice && currentPrediction) {

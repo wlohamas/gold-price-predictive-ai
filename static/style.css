@@ -91,6 +91,13 @@ header p.signature {
     box-shadow: 0 0 20px rgba(0, 210, 255, 0.1);
 }
 
+header p.signature .author-name {
+    color: #FFD700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+    font-weight: 800;
+    margin-left: 5px;
+}
+
 .card-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
